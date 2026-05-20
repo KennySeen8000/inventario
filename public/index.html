@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Stock - Sistema de Inventario</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <span class="logo-text">StockControl</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9"></rect>
+            <rect x="14" y="3" width="7" height="5"></rect>
+            <rect x="14" y="12" width="7" height="9"></rect>
+            <rect x="3" y="16" width="7" height="5"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="new-product">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <span>Nuevo Producto</span>
+        </button>
+        <button class="nav-item" data-view="movements">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span>Movimientos</span>
+        </button>
+        <button class="nav-item" data-view="inventory">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span>Inventario</span>
+        </button>
+        <button class="nav-item" data-view="reports">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span>Reportes</span>
+        </button>
+        <button class="nav-item" data-view="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>Buscar</span>
+        </button>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="connection-status" id="connection-status">
+          <span class="status-dot"></span>
+          <span class="status-text">Conectando...</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button class="menu-toggle" id="menu-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <span class="mobile-title">StockControl</span>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard View -->
+      <section class="view active" id="dashboard-view">
+        <div class="view-header">
+          <h1>Dashboard</h1>
+          <p class="view-subtitle">Resumen general del inventario</p>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-products">0</span>
+              <span class="stat-label">Total Productos</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-movements">0</span>
+              <span class="stat-label">Total Movimientos</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-value">$0</span>
+              <span class="stat-label">Valor Total</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon yellow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="low-stock">0</span>
+              <span class="stat-label">Stock Bajo</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="out-of-stock">0</span>
+              <span class="stat-label">Sin Stock</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Movimientos Recientes</h3>
+            </div>
+            <div class="card-content">
+              <div class="recent-list" id="recent-movements"></div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h3>Alertas de Stock</h3>
+            </div>
+            <div class="card-content">
+              <div class="alert-list" id="stock-alerts"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- New Product View -->
+      <section class="view" id="new-product-view">
+        <div class="view-header">
+          <h1>Nuevo Producto</h1>
+          <p class="view-subtitle">Registrar un nuevo producto en el inventario</p>
+        </div>
+        
+        <div class="card form-card">
+          <form id="product-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="product-code">Codigo *</label>
+                <input type="text" id="product-code" required placeholder="Ej: PROD-001">
+              </div>
+              
+              <div class="form-group">
+                <label for="product-name">Nombre *</label>
+                <input type="text" id="product-name" required placeholder="Nombre del producto">
+              </div>
+              
+              <div class="form-group">
+                <label for="product-unit">Unidad de Medida *</label>
+                <select id="product-unit" required>
+                  <option value="">Seleccionar...</option>
+                  <option value="unidad">Unidad</option>
+                  <option value="kg">Kilogramo (kg)</option>
+                  <option value="g">Gramo (g)</option>
+                  <option value="l">Litro (l)</option>
+                  <option value="ml">Mililitro (ml)</option>
+                  <option value="m">Metro (m)</option>
+                  <option value="cm">Centimetro (cm)</option>
+                  <option value="caja">Caja</option>
+                  <option value="paquete">Paquete</option>
+                  <option value="docena">Docena</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="product-group">Grupo *</label>
+                <select id="product-group" required>
+                  <option value="">Seleccionar...</option>
+                  <option value="electronica">Electronica</option>
+                  <option value="alimentos">Alimentos</option>
+                  <option value="bebidas">Bebidas</option>
+                  <option value="limpieza">Limpieza</option>
+                  <option value="papeleria">Papeleria</option>
+                  <option value="herramientas">Herramientas</option>
+                  <option value="ropa">Ropa</option>
+                  <option value="hogar">Hogar</option>
+                  <option value="otros">Otros</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="product-stock">Stock Inicial</label>
+                <input type="number" id="product-stock" min="0" value="0" placeholder="0">
+              </div>
+              
+              <div class="form-group">
+                <label for="product-min-stock">Stock Minimo (Alerta)</label>
+                <input type="number" id="product-min-stock" min="0" value="5" placeholder="5">
+              </div>
+              
+              <div class="form-group">
+                <label for="product-price">Precio Unitario</label>
+                <input type="number" id="product-price" min="0" step="0.01" value="0" placeholder="0.00">
+              </div>
+              
+              <div class="form-group">
+                <label for="product-warehouse">Almacen</label>
+                <select id="product-warehouse">
+                  <option value="principal">Principal</option>
+                  <option value="secundario">Secundario</option>
+                  <option value="bodega">Bodega</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="clearProductForm()">Limpiar</button>
+              <button type="submit" class="btn btn-primary">Guardar Producto</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Movements View -->
+      <section class="view" id="movements-view">
+        <div class="view-header">
+          <h1>Movimientos</h1>
+          <p class="view-subtitle">Gestionar entradas, salidas y transferencias</p>
+        </div>
+        
+        <div class="tabs">
+          <button class="tab active" data-tab="entry">Entrada</button>
+          <button class="tab" data-tab="exit">Salida</button>
+          <button class="tab" data-tab="transfer">Transferencia</button>
+          <button class="tab" data-tab="history">Historial</button>
+        </div>
+        
+        <!-- Entry Tab -->
+        <div class="tab-content active" id="entry-tab">
+          <div class="card form-card">
+            <h3>Registrar Entrada</h3>
+            <form id="entry-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="entry-product">Producto *</label>
+                  <select id="entry-product" required>
+                    <option value="">Seleccionar producto...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="entry-quantity">Cantidad *</label>
+                  <input type="number" id="entry-quantity" min="1" required placeholder="Cantidad">
+                </div>
+                <div class="form-group">
+                  <label for="entry-warehouse">Almacen Destino</label>
+                  <select id="entry-warehouse">
+                    <option value="principal">Principal</option>
+                    <option value="secundario">Secundario</option>
+                    <option value="bodega">Bodega</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="entry-reason">Motivo</label>
+                  <input type="text" id="entry-reason" placeholder="Ej: Compra, Devolucion...">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Registrar Entrada</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Exit Tab -->
+        <div class="tab-content" id="exit-tab">
+          <div class="card form-card">
+            <h3>Registrar Salida</h3>
+            <form id="exit-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="exit-product">Producto *</label>
+                  <select id="exit-product" required>
+                    <option value="">Seleccionar producto...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="exit-quantity">Cantidad *</label>
+                  <input type="number" id="exit-quantity" min="1" required placeholder="Cantidad">
+                </div>
+                <div class="form-group">
+                  <label for="exit-warehouse">Almacen Origen</label>
+                  <select id="exit-warehouse">
+                    <option value="principal">Principal</option>
+                    <option value="secundario">Secundario</option>
+                    <option value="bodega">Bodega</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="exit-reason">Motivo</label>
+                  <input type="text" id="exit-reason" placeholder="Ej: Venta, Merma...">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Registrar Salida</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Transfer Tab -->
+        <div class="tab-content" id="transfer-tab">
+          <div class="card form-card">
+            <h3>Registrar Transferencia</h3>
+            <form id="transfer-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="transfer-product">Producto *</label>
+                  <select id="transfer-product" required>
+                    <option value="">Seleccionar producto...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="transfer-quantity">Cantidad *</label>
+                  <input type="number" id="transfer-quantity" min="1" required placeholder="Cantidad">
+                </div>
+                <div class="form-group">
+                  <label for="transfer-from">Almacen Origen *</label>
+                  <select id="transfer-from" required>
+                    <option value="principal">Principal</option>
+                    <option value="secundario">Secundario</option>
+                    <option value="bodega">Bodega</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="transfer-to">Almacen Destino *</label>
+                  <select id="transfer-to" required>
+                    <option value="secundario">Secundario</option>
+                    <option value="principal">Principal</option>
+                    <option value="bodega">Bodega</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Registrar Transferencia</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- History Tab -->
+        <div class="tab-content" id="history-tab">
+          <div class="card">
+            <div class="card-header">
+              <h3>Historial de Movimientos</h3>
+              <div class="filter-group">
+                <select id="history-filter">
+                  <option value="all">Todos</option>
+                  <option value="entrada">Entradas</option>
+                  <option value="salida">Salidas</option>
+                  <option value="transferencia">Transferencias</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Tipo</th>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Almacen</th>
+                      <th>Motivo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="movements-table"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inventory View -->
+      <section class="view" id="inventory-view">
+        <div class="view-header">
+          <h1>Inventario</h1>
+          <p class="view-subtitle">Lista completa de productos</p>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <div class="filter-group">
+              <select id="inventory-group-filter">
+                <option value="all">Todos los grupos</option>
+                <option value="electronica">Electronica</option>
+                <option value="alimentos">Alimentos</option>
+                <option value="bebidas">Bebidas</option>
+                <option value="limpieza">Limpieza</option>
+                <option value="papeleria">Papeleria</option>
+                <option value="herramientas">Herramientas</option>
+                <option value="ropa">Ropa</option>
+                <option value="hogar">Hogar</option>
+                <option value="otros">Otros</option>
+              </select>
+              <select id="inventory-status-filter">
+                <option value="all">Todos los estados</option>
+                <option value="available">Disponible</option>
+                <option value="low">Stock Bajo</option>
+                <option value="out">Sin Stock</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Codigo</th>
+                    <th>Nombre</th>
+                    <th>Grupo</th>
+                    <th>Stock</th>
+                    <th>Unidad</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reports View -->
+      <section class="view" id="reports-view">
+        <div class="view-header">
+          <h1>Reportes</h1>
+          <p class="view-subtitle">Generar reportes del inventario</p>
+        </div>
+        
+        <div class="reports-grid">
+          <div class="card report-card">
+            <div class="report-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+              </svg>
+            </div>
+            <h3>Inventario Actual</h3>
+            <p>Reporte completo del stock con valores</p>
+            <button class="btn btn-primary" onclick="generateInventoryReport()">Generar Reporte</button>
+          </div>
+          
+          <div class="card report-card">
+            <div class="report-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+              </svg>
+            </div>
+            <h3>Movimientos por Fecha</h3>
+            <p>Filtrar movimientos por rango de fechas</p>
+            <div class="date-range">
+              <input type="date" id="report-date-from">
+              <span>a</span>
+              <input type="date" id="report-date-to">
+            </div>
+            <button class="btn btn-primary" onclick="generateMovementsReport()">Generar Reporte</button>
+          </div>
+          
+          <div class="card report-card">
+            <div class="report-icon yellow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <h3>Stock Bajo</h3>
+            <p>Productos que necesitan reposicion</p>
+            <button class="btn btn-primary" onclick="generateLowStockReport()">Generar Reporte</button>
+          </div>
+        </div>
+        
+        <div class="card" id="report-result" style="display: none;">
+          <div class="card-header">
+            <h3 id="report-title">Resultado del Reporte</h3>
+            <button class="btn btn-secondary" onclick="exportReportCSV()">Exportar CSV</button>
+          </div>
+          <div class="card-content">
+            <div class="table-container">
+              <table class="data-table">
+                <thead id="report-thead"></thead>
+                <tbody id="report-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search View -->
+      <section class="view" id="search-view">
+        <div class="view-header">
+          <h1>Buscar</h1>
+          <p class="view-subtitle">Busqueda global en productos y movimientos</p>
+        </div>
+        
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="global-search" placeholder="Buscar por nombre, codigo, grupo o motivo...">
+          </div>
+        </div>
+        
+        <div class="search-results">
+          <div class="card">
+            <div class="card-header">
+              <h3>Productos Encontrados</h3>
+              <span class="result-count" id="product-count">0 resultados</span>
+            </div>
+            <div class="card-content">
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Codigo</th>
+                      <th>Nombre</th>
+                      <th>Grupo</th>
+                      <th>Stock</th>
+                      <th>Precio</th>
+                    </tr>
+                  </thead>
+                  <tbody id="search-products"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h3>Movimientos Encontrados</h3>
+              <span class="result-count" id="movement-count">0 resultados</span>
+            </div>
+            <div class="card-content">
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Tipo</th>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Motivo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="search-movements"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Edit Product Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Editar Producto</h3>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form id="edit-form">
+        <input type="hidden" id="edit-product-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit-code">Codigo</label>
+            <input type="text" id="edit-code" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-name">Nombre</label>
+            <input type="text" id="edit-name" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-unit">Unidad de Medida</label>
+            <select id="edit-unit" required>
+              <option value="unidad">Unidad</option>
+              <option value="kg">Kilogramo (kg)</option>
+              <option value="g">Gramo (g)</option>
+              <option value="l">Litro (l)</option>
+              <option value="ml">Mililitro (ml)</option>
+              <option value="m">Metro (m)</option>
+              <option value="cm">Centimetro (cm)</option>
+              <option value="caja">Caja</option>
+              <option value="paquete">Paquete</option>
+              <option value="docena">Docena</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-group">Grupo</label>
+            <select id="edit-group" required>
+              <option value="electronica">Electronica</option>
+              <option value="alimentos">Alimentos</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="limpieza">Limpieza</option>
+              <option value="papeleria">Papeleria</option>
+              <option value="herramientas">Herramientas</option>
+              <option value="ropa">Ropa</option>
+              <option value="hogar">Hogar</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-stock">Stock</label>
+            <input type="number" id="edit-stock" min="0">
+          </div>
+          <div class="form-group">
+            <label for="edit-min-stock">Stock Minimo</label>
+            <input type="number" id="edit-min-stock" min="0">
+          </div>
+          <div class="form-group">
+            <label for="edit-price">Precio</label>
+            <input type="number" id="edit-price" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="edit-warehouse">Almacen</label>
+            <select id="edit-warehouse">
+              <option value="principal">Principal</option>
+              <option value="secundario">Secundario</option>
+              <option value="bodega">Bodega</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span class="toast-message"></span>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
