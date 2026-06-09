@@ -169,8 +169,8 @@ function setupRealtimeListeners() {
 
 // ===== Dashboard =====
 function updateDashboard() {
-  // Total products
-  document.getElementById('total-products').textContent = products.length;
+  // Total productos
+  document.getElementById('total-productos').textContent = producto.length;
   
   // Total movements
   document.getElementById('total-movements').textContent = movements.length;
@@ -265,7 +265,7 @@ document.getElementById('formulario-producto').addEventListener('submit', async 
     stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
     precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
     almacen_producto: document.getElementById('almacen-producto').value,
-    createdAt: Timestamp.now()
+    fecha_creacion: Timestamp.now()
   };
   
   try {
