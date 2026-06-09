@@ -28,7 +28,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 let app, db;
-let products = [];
+let productos = [];
+let producto = [];
 let movements = [];
 
 try {
@@ -58,6 +59,17 @@ function updateConnectionStatus(status) {
     default:
       text.textContent = 'Conectando...';
   }
+}
+
+async function cargarProductos() {
+    const querySnapshot = await getDocs(collection(db, "producto"));
+
+    productos = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+
+    updateDashboard();
 }
 
 // ===== Navigation =====
@@ -139,17 +151,17 @@ function capitalizeFirst(str) {
 
 // ===== Data Listeners =====
 function setupRealtimeListeners() {
-  // Products listener
-  const productsRef = collection(db, 'products');
-  onSnapshot(productsRef, (snapshot) => {
-    products = snapshot.docs.map(doc => ({
+  // productos listener
+  const productosRef = collection(db, 'productos');
+  onSnapshot(productosRef, (snapshot) => {
+    productos = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
     updateDashboard();
     updateInventoryTable();
   }, (error) => {
-    console.error('Products listener error:', error);
+    console.error('productos listener error:', error);
     updateConnectionStatus('error');
   });
 
@@ -170,28 +182,30 @@ function setupRealtimeListeners() {
 // ===== Dashboard =====
 function updateDashboard() {
   // Total productos
-  document.getElementById('total-productos').textContent = producto.length;
+  console.log(productos);
+  console.log(productos.length);
+  document.getElementById('total-productos').textContent = productos.length;
+
+  // // Total movements
+  // document.getElementById('total-movements').textContent = movements.length;
+
+  // // Total value
+  // const totalValue = productos.reduce((sum, p) => sum + (p.stock * p.price), 0);
+  // document.getElementById('total-value').textContent = formatCurrency(totalValue);
   
-  // Total movements
-  document.getElementById('total-movements').textContent = movements.length;
+  // // Low stock
+  // const lowStock = productos.filter(p => p.stock > 0 && p.stock <= p.minStock).length;
+  // document.getElementById('low-stock').textContent = lowStock;
   
-  // Total value
-  const totalValue = products.reduce((sum, p) => sum + (p.stock * p.price), 0);
-  document.getElementById('total-value').textContent = formatCurrency(totalValue);
+  // // Out of stock
+  // const outOfStock = productos.filter(p => p.stock === 0).length;
+  // document.getElementById('out-of-stock').textContent = outOfStock;
   
-  // Low stock
-  const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.minStock).length;
-  document.getElementById('low-stock').textContent = lowStock;
+  // // Recent movements
+  // updateRecentMovements();
   
-  // Out of stock
-  const outOfStock = products.filter(p => p.stock === 0).length;
-  document.getElementById('out-of-stock').textContent = outOfStock;
-  
-  // Recent movements
-  updateRecentMovements();
-  
-  // Stock alerts
-  updateStockAlerts();
+  // // Stock alerts
+  // updateStockAlerts();
 }
 
 function updateRecentMovements() {
@@ -225,7 +239,7 @@ function updateRecentMovements() {
 
 function updateStockAlerts() {
   const container = document.getElementById('stock-alerts');
-  const alerts = products.filter(p => p.stock <= p.minStock);
+  const alerts = productos.filter(p => p.stock <= p.minStock);
   
   if (alerts.length === 0) {
     container.innerHTML = '<div class="empty-state">No hay alertas de stock</div>';
@@ -288,7 +302,7 @@ function updateInventoryTable() {
   const groupFilter = document.getElementById('inventory-group-filter').value;
   const statusFilter = document.getElementById('inventory-status-filter').value;
   
-  let filtered = [...products];
+  let filtered = [...productos];
   
   if (groupFilter !== 'all') {
     filtered = filtered.filter(p => p.group === groupFilter);
@@ -354,7 +368,7 @@ document.getElementById('inventory-status-filter').addEventListener('change', up
 
 // ===== Edit Modal =====
 window.openEditModal = function(productId) {
-  const product = products.find(p => p.id === productId);
+  const product = productos.find(p => p.id === productId);
   if (!product) return;
   
   document.getElementById('edit-product-id').value = productId;
@@ -391,7 +405,7 @@ document.getElementById('edit-form').addEventListener('submit', async (e) => {
   };
   
   try {
-    await updateDoc(doc(db, 'products', productId), updates);
+    await updateDoc(doc(db, 'productos', productId), updates);
     showToast('Producto actualizado correctamente');
     closeEditModal();
   } catch (error) {
@@ -404,7 +418,7 @@ window.deleteProduct = async function(productId) {
   if (!confirm('¿Esta seguro de eliminar este producto?')) return;
   
   try {
-    await deleteDoc(doc(db, 'products', productId));
+    await deleteDoc(doc(db, 'productos', productId));
     showToast('Producto eliminado correctamente');
   } catch (error) {
     console.error('Error deleting product:', error);
@@ -418,7 +432,7 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   
   const productId = document.getElementById('entry-product-id').value;
-  const product = products.find(p => p.id === productId);
+  const product = productos.find(p => p.id === productId);
   
   if (!product) {
     showToast('Debe seleccionar un producto valido de la lista', 'error');
@@ -448,7 +462,7 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
     });
     
     // Update product stock
-    await updateDoc(doc(db, 'products', productId), {
+    await updateDoc(doc(db, 'productos', productId), {
       stock: product.stock + quantity
     });
     
@@ -466,7 +480,7 @@ document.getElementById('exit-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   
   const productId = document.getElementById('exit-product-id').value;
-  const product = products.find(p => p.id === productId);
+  const product = productos.find(p => p.id === productId);
   
   if (!product) {
     showToast('Debe seleccionar un producto valido de la lista', 'error');
@@ -500,7 +514,7 @@ document.getElementById('exit-form').addEventListener('submit', async (e) => {
       createdAt: Timestamp.now()
     });
     
-    await updateDoc(doc(db, 'products', productId), {
+    await updateDoc(doc(db, 'productos', productId), {
       stock: product.stock - quantity
     });
     
@@ -518,7 +532,7 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
   e.preventDefault();
   
   const productId = document.getElementById('transfer-product-id').value;
-  const product = products.find(p => p.id === productId);
+  const product = productos.find(p => p.id === productId);
   
   if (!product) {
     showToast('Debe seleccionar un producto valido de la lista', 'error');
@@ -623,7 +637,7 @@ function setupAutocomplete(inputId, listId, hiddenId) {
       return;
     }
     
-    const matches = products.filter(p => 
+    const matches = productos.filter(p => 
       p.code.toUpperCase().includes(value) || 
       p.name.toUpperCase().includes(value)
     ).slice(0, 8);
@@ -702,7 +716,7 @@ let currentReportType = '';
 
 window.generateInventoryReport = function() {
   currentReportType = 'inventory';
-  currentReportData = products.map(p => ({
+  currentReportData = productos.map(p => ({
     Codigo: p.code,
     Nombre: p.name,
     Grupo: capitalizeFirst(p.group),
@@ -755,9 +769,9 @@ window.generateMovementsReport = function() {
 
 window.generateLowStockReport = function() {
   currentReportType = 'lowstock';
-  const lowStockProducts = products.filter(p => p.stock <= p.minStock);
+  const lowStockproductos = productos.filter(p => p.stock <= p.minStock);
   
-  currentReportData = lowStockProducts.map(p => ({
+  currentReportData = lowStockproductos.map(p => ({
     Codigo: p.code,
     Nombre: p.name,
     Grupo: capitalizeFirst(p.group),
@@ -831,14 +845,14 @@ window.exportReportCSV = function() {
 document.getElementById('global-search').addEventListener('input', (e) => {
   const query = e.target.value.toLowerCase().trim();
   
-  // Search products
-  const productResults = query ? products.filter(p => 
+  // Search productos
+  const productResults = query ? productos.filter(p => 
     p.name.toLowerCase().includes(query) ||
     p.code.toLowerCase().includes(query) ||
     p.group.toLowerCase().includes(query)
   ) : [];
   
-  updateSearchProducts(productResults);
+  updateSearchproductos(productResults);
   
   // Search movements
   const movementResults = query ? movements.filter(m =>
@@ -850,10 +864,10 @@ document.getElementById('global-search').addEventListener('input', (e) => {
   updateSearchMovements(movementResults);
 });
 
-function updateSearchProducts(results) {
+function updateSearchproductos(results) {
   document.getElementById('product-count').textContent = `${results.length} resultado${results.length !== 1 ? 's' : ''}`;
   
-  const tbody = document.getElementById('search-products');
+  const tbody = document.getElementById('search-productos');
   
   if (results.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No se encontraron productos</td></tr>';
