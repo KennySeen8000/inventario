@@ -257,14 +257,14 @@ document.getElementById('formulario-producto').addEventListener('submit', async 
   e.preventDefault();
   
   const producto = {
-    code: document.getElementById('codigo-producto').value,
-    name: document.getElementById('nombre-producto').value,
-    unit: document.getElementById('unidad-producto').value,
-    group: document.getElementById('tipo-producto').value,
-    stock: parseInt(document.getElementById('stock-producto').value) || 0,
-    minStock: parseInt(document.getElementById('stock-min-producto').value) || 5,
-    price: parseFloat(document.getElementById('precio-producto').value) || 0,
-    warehouse: document.getElementById('almacen-producto').value,
+    codigo_producto: document.getElementById('codigo-producto').value,
+    nombre_producto: document.getElementById('nombre-producto').value,
+    unidad_producto: document.getElementById('unidad-producto').value,
+    tipo_producto: document.getElementById('tipo-producto').value,
+    stock_producto: parseInt(document.getElementById('stock-producto').value) || 0,
+    stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
+    precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
+    almacen_producto: document.getElementById('almacen-producto').value,
     createdAt: Timestamp.now()
   };
   
