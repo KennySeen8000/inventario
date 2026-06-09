@@ -252,24 +252,24 @@ function updateStockAlerts() {
   `).join('');
 }
 
-// ===== Products =====
-document.getElementById('product-form').addEventListener('submit', async (e) => {
+// ===== Productos =====
+document.getElementById('formulario-producto').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const product = {
-    code: document.getElementById('product-code').value,
-    name: document.getElementById('product-name').value,
-    unit: document.getElementById('product-unit').value,
-    group: document.getElementById('product-group').value,
-    stock: parseInt(document.getElementById('product-stock').value) || 0,
-    minStock: parseInt(document.getElementById('product-min-stock').value) || 5,
-    price: parseFloat(document.getElementById('product-price').value) || 0,
-    warehouse: document.getElementById('product-warehouse').value,
+  const producto = {
+    code: document.getElementById('codigo-producto').value,
+    name: document.getElementById('nombre-producto').value,
+    unit: document.getElementById('unidad-producto').value,
+    group: document.getElementById('tipo-producto').value,
+    stock: parseInt(document.getElementById('stock-producto').value) || 0,
+    minStock: parseInt(document.getElementById('stock-min-producto').value) || 5,
+    price: parseFloat(document.getElementById('precio-producto').value) || 0,
+    warehouse: document.getElementById('almacen-producto').value,
     createdAt: Timestamp.now()
   };
   
   try {
-    await addDoc(collection(db, 'products'), product);
+    await addDoc(collection(db, 'producto'), producto);
     showToast('Producto guardado correctamente');
     clearProductForm();
   } catch (error) {
@@ -279,7 +279,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
 });
 
 window.clearProductForm = function() {
-  document.getElementById('product-form').reset();
+  document.getElementById('formulario-producto').reset();
 };
 
 // ===== Inventory =====
