@@ -4,6 +4,7 @@ import {
   getFirestore, 
   collection, 
   addDoc, 
+  setDoc,
   getDocs, 
   doc, 
   updateDoc, 
@@ -61,15 +62,24 @@ function updateConnectionStatus(status) {
   }
 }
 
-async function cargarProductos() {
-    const querySnapshot = await getDocs(collection(db, "producto"));
+// const precioSinIva = p.precio_unitario || 0;
+// const precioConIva = precioSinIva * 1.19;
 
-    productos = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
+// const totalSinIva = p.stock_producto * precioSinIva;
+// const totalConIva = p.stock_producto * precioConIva;
 
-    updateDashboard();
+function cargarProductos() {
+    onSnapshot(collection(db, "producto"), (querySnapshot) => {
+
+        producto = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));  
+        document.getElementById('total-productos').textContent = producto.length;
+  
+        updateInventoryTable();
+        // console.log("Cantidad de productos:", producto.length);
+    });
 }
 
 // ===== Navigation =====
@@ -182,9 +192,11 @@ function setupRealtimeListeners() {
 // ===== Dashboard =====
 function updateDashboard() {
   // Total productos
-  console.log(productos);
-  console.log(productos.length);
-  document.getElementById('total-productos').textContent = productos.length;
+  producto = cargarProductos();
+  // console.log("cantidad",producto);
+
+  // console.log(producto.length);
+  // document.getElementById('total-productos').textContent = producto.length;
 
   // // Total movements
   // document.getElementById('total-movements').textContent = movements.length;
@@ -267,27 +279,103 @@ function updateStockAlerts() {
 }
 
 // ===== Productos =====
+// document.getElementById('formulario-producto').addEventListener('submit', async (e) => {
+//   e.preventDefault();
+  
+//   const producto = {
+//     codigo_producto: document.getElementById('codigo-producto').value,
+//     nombre_producto: document.getElementById('nombre-producto').value,
+//     unidad_producto: document.getElementById('unidad-producto').value,
+//     tipo_producto: document.getElementById('tipo-producto').value,
+//     stock_producto: parseInt(document.getElementById('stock-producto').value) || 0,
+//     stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
+//     precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
+//     almacen_producto: document.getElementById('almacen-producto').value,
+//     fecha_creacion: Timestamp.now()
+//   };
+  
+//   try {
+//     await addDoc(collection(db, 'producto'), producto);
+//     showToast('Producto guardado correctamente');
+//     clearProductForm();
+//   } catch (error) {
+//     console.error('Error adding product:', error);
+//     showToast('Error al guardar el producto', 'error');
+//   }
+// });
+
+// document.getElementById('formulario-producto').addEventListener('submit', async (e) => {
+//   e.preventDefault();
+// length
+//   const productoRef = collection(db, 'producto');
+//   const snapshot = await getDocs(productoRef);
+
+//   const nuevoId = snapshot.size.toString();
+
+//   const producto = {
+//     codigo_producto: document.getElementById('codigo-producto').value,
+//     nombre_producto: document.getElementById('nombre-producto').value,
+//     unidad_producto: document.getElementById('unidad-producto').value,
+//     tipo_producto: document.getElementById('tipo-producto').value,
+//     stock_producto: parseInt(document.getElementById('stock-producto').value) || 0,
+//     stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
+//     precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
+//     almacen_producto: document.getElementById('almacen-producto').value,
+//     fecha_creacion: Timestamp.now()
+//   };
+
+//   try {
+//     await setDoc(doc(db, 'producto', nuevoId), producto);
+//     showToast('Producto guardado correctamente');
+//     clearProductForm();
+//   } catch (error) {
+//     console.error(error);
+//     showToast('Error al guardar el producto', 'error');
+//   }
+// });
 document.getElementById('formulario-producto').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
-  const producto = {
-    codigo_producto: document.getElementById('codigo-producto').value,
-    nombre_producto: document.getElementById('nombre-producto').value,
-    unidad_producto: document.getElementById('unidad-producto').value,
-    tipo_producto: document.getElementById('tipo-producto').value,
-    stock_producto: parseInt(document.getElementById('stock-producto').value) || 0,
-    stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
-    precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
-    almacen_producto: document.getElementById('almacen-producto').value,
-    fecha_creacion: Timestamp.now()
-  };
-  
+
+  const codigoProducto = document.getElementById('codigo-producto').value.trim();
+
   try {
-    await addDoc(collection(db, 'producto'), producto);
+    // Validar si el código ya existe
+    const q = query(
+      collection(db, 'producto'),
+      where('codigo_producto', '==', codigoProducto)
+    );
+
+    const codigoExistente = await getDocs(q);
+
+    if (!codigoExistente.empty) {
+      alert('El código de producto ya existe. Por favor ingrese otro código.');
+      return;
+    }
+
+    // Obtener ID correlativo
+    const productoRef = collection(db, 'producto');
+    const snapshot = await getDocs(productoRef);
+    const nuevoId = snapshot.size.toString();
+
+    const producto = {
+      codigo_producto: codigoProducto,
+      nombre_producto: document.getElementById('nombre-producto').value,
+      unidad_producto: document.getElementById('unidad-producto').value,
+      tipo_producto: document.getElementById('tipo-producto').value,
+      stock_producto: parseInt(document.getElementById('stock-producto').value) || 0,
+      stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
+      precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
+      almacen_producto: document.getElementById('almacen-producto').value,
+      fecha_creacion: Timestamp.now()
+    };
+
+    await setDoc(doc(db, 'producto', nuevoId), producto);
+
     showToast('Producto guardado correctamente');
     clearProductForm();
+
   } catch (error) {
-    console.error('Error adding product:', error);
+    console.error(error);
     showToast('Error al guardar el producto', 'error');
   }
 });
@@ -297,70 +385,183 @@ window.clearProductForm = function() {
 };
 
 // ===== Inventory =====
+// function updateInventoryTable() {
+//   const tbody = document.getElementById('inventory-table');
+//   const groupFilter = document.getElementById('inventory-group-filter').value;
+//   const statusFilter = document.getElementById('inventory-status-filter').value;
+  
+//   let filtered = [...productos];
+  
+//   if (groupFilter !== 'all') {
+//     filtered = filtered.filter(p => p.group === groupFilter);
+//   }
+  
+//   if (statusFilter !== 'all') {
+//     filtered = filtered.filter(p => {
+//       if (statusFilter === 'available') return p.stock > p.minStock;
+//       if (statusFilter === 'low') return p.stock > 0 && p.stock <= p.minStock;
+//       if (statusFilter === 'out') return p.stock === 0;
+//       return true;
+//     });
+//   }
+  
+//   if (filtered.length === 0) {
+//     tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay productos que mostrar</td></tr>';
+//     return;
+//   }
+  
+//   tbody.innerHTML = filtered.map(p => {
+//     let status, badgeClass;
+//     if (p.stock === 0) {
+//       status = 'Sin Stock';
+//       badgeClass = 'badge-danger';
+//     } else if (p.stock <= p.minStock) {
+//       status = 'Stock Bajo';
+//       badgeClass = 'badge-warning';
+//     } else {
+//       status = 'Disponible';
+//       badgeClass = 'badge-success';
+//     }
+    
+//     return `
+//       <tr>
+//         <td>${p.code}</td>
+//         <td>${p.name}</td>
+//         <td>${capitalizeFirst(p.group)}</td>
+//         <td>${p.stock}</td>
+//         <td>${p.unit}</td>
+//         <td>${formatCurrency(p.price)}</td>
+//         <td><span class="badge ${badgeClass}">${status}</span></td>
+//         <td class="actions">
+//           <button class="btn-icon" onclick="openEditModal('${p.id}')" title="Editar">
+//             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+//               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+//             </svg>
+//           </button>
+//           <button class="btn-icon" onclick="deleteProduct('${p.id}')" title="Eliminar">
+//             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+//               <polyline points="3 6 5 6 21 6"></polyline>
+//               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+//             </svg>
+//           </button>
+//         </td>
+//       </tr>
+//     `;
+//   }).join('');
+// }
+
 function updateInventoryTable() {
   const tbody = document.getElementById('inventory-table');
   const groupFilter = document.getElementById('inventory-group-filter').value;
   const statusFilter = document.getElementById('inventory-status-filter').value;
-  
-  let filtered = [...productos];
-  
+
+ 
+  let filtered = [...producto];
+  console.log("producto en inventario:", filtered);
+
+  // Filtrar por tipo de producto
   if (groupFilter !== 'all') {
-    filtered = filtered.filter(p => p.group === groupFilter);
+    filtered = filtered.filter(
+      p => p.tipo_producto === groupFilter
+    );
   }
-  
+
+  // Filtrar por estado de stock
   if (statusFilter !== 'all') {
     filtered = filtered.filter(p => {
-      if (statusFilter === 'available') return p.stock > p.minStock;
-      if (statusFilter === 'low') return p.stock > 0 && p.stock <= p.minStock;
-      if (statusFilter === 'out') return p.stock === 0;
+      if (statusFilter === 'available') {
+        return p.stock_producto > p.stock_minimo;
+      }
+
+      if (statusFilter === 'low') {
+        return (
+          p.stock_producto > 0 &&
+          p.stock_producto <= p.stock_minimo
+        );
+      }
+
+      if (statusFilter === 'out') {
+        return p.stock_producto === 0;
+      }
+
       return true;
     });
   }
-  
+
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay productos que mostrar</td></tr>';
-    return;
-  }
-  
-  tbody.innerHTML = filtered.map(p => {
-    let status, badgeClass;
-    if (p.stock === 0) {
-      status = 'Sin Stock';
-      badgeClass = 'badge-danger';
-    } else if (p.stock <= p.minStock) {
-      status = 'Stock Bajo';
-      badgeClass = 'badge-warning';
-    } else {
-      status = 'Disponible';
-      badgeClass = 'badge-success';
-    }
-    
-    return `
+    tbody.innerHTML = `
       <tr>
-        <td>${p.code}</td>
-        <td>${p.name}</td>
-        <td>${capitalizeFirst(p.group)}</td>
-        <td>${p.stock}</td>
-        <td>${p.unit}</td>
-        <td>${formatCurrency(p.price)}</td>
-        <td><span class="badge ${badgeClass}">${status}</span></td>
-        <td class="actions">
-          <button class="btn-icon" onclick="openEditModal('${p.id}')" title="Editar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-          </button>
-          <button class="btn-icon" onclick="deleteProduct('${p.id}')" title="Eliminar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
+        <td colspan="8" class="empty-state">
+          No hay producto que mostrar
         </td>
       </tr>
     `;
-  }).join('');
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => {
+
+  const precioSinIva = p.precio_unitario || 0;
+  const precioConIva = precioSinIva * 1.19;
+
+  const totalSinIva = p.stock_producto * precioSinIva;
+  const totalConIva = p.stock_producto * precioConIva;
+
+  let status;
+  let badgeClass;
+
+  if (p.stock_producto === 0) {
+    status = 'Sin Stock';
+    badgeClass = 'badge-danger';
+  } else if (p.stock_producto <= p.stock_minimo) {
+    status = 'Stock Bajo';
+    badgeClass = 'badge-warning';
+  } else {
+    status = 'Disponible';
+    badgeClass = 'badge-success';
+  }
+
+  return `
+  <tr data-id="${p.id}">
+    <td>${p.codigo_producto}</td>
+    <td>${p.nombre_producto}</td>
+    <td>${p.tipo_producto}</td>
+    <td>${p.stock_producto}</td>
+    <td>${p.unidad_producto}</td>
+
+    <td>${formatCurrency(precioSinIva)}</td>
+    <td>${formatCurrency(precioConIva)}</td>
+
+    <td>${formatCurrency(totalSinIva)}</td>
+    <td>${formatCurrency(totalConIva)}</td>
+
+    <td>
+      <span class="badge ${badgeClass}">
+        ${status}
+      </span>
+    </td>
+
+    <td class="actions">
+      <button
+        class="btn-icon"
+        onclick="openEditModal('${p.id}')"
+        title="Editar"
+      >
+        ✏️
+      </button>
+
+      <button
+        class="btn-icon"
+        onclick="deleteProduct('${p.id}')"
+        title="Eliminar"
+      >
+        🗑️
+      </button>
+    </td>
+  </tr>
+`;
+}).join('');
 }
 
 document.getElementById('inventory-group-filter').addEventListener('change', updateInventoryTable);
@@ -368,19 +569,24 @@ document.getElementById('inventory-status-filter').addEventListener('change', up
 
 // ===== Edit Modal =====
 window.openEditModal = function(productId) {
-  const product = productos.find(p => p.id === productId);
-  if (!product) return;
-  
-  document.getElementById('edit-product-id').value = productId;
-  document.getElementById('edit-code').value = product.code;
-  document.getElementById('edit-name').value = product.name;
-  document.getElementById('edit-unit').value = product.unit;
-  document.getElementById('edit-group').value = product.group;
-  document.getElementById('edit-stock').value = product.stock;
-  document.getElementById('edit-min-stock').value = product.minStock;
-  document.getElementById('edit-price').value = product.price;
-  document.getElementById('edit-warehouse').value = product.warehouse;
-  
+
+  const productoSeleccionado = producto.find(p => p.id === productId);
+
+  if (!productoSeleccionado) {
+    console.error("Producto no encontrado:", productId);
+    return;
+  }
+
+  document.getElementById('editar-producto-id').value = productoSeleccionado.id;
+  document.getElementById('editar-codigo-producto').value = productoSeleccionado.codigo_producto;
+  document.getElementById('editar-nombre-producto').value = productoSeleccionado.nombre_producto;
+  document.getElementById('editar-unidad-producto').value = productoSeleccionado.unidad_producto;
+  document.getElementById('editar-tipo-producto').value = productoSeleccionado.tipo_producto;
+  document.getElementById('editar-stock-producto').value = productoSeleccionado.stock_producto;
+  document.getElementById('editar-stock-minimo').value = productoSeleccionado.stock_minimo;
+  document.getElementById('editar-precio-unitario').value = productoSeleccionado.precio_unitario;
+  document.getElementById('editar-almacen-producto').value = productoSeleccionado.almacen_producto;
+
   document.getElementById('edit-modal').classList.add('active');
 };
 
@@ -390,24 +596,29 @@ window.closeEditModal = function() {
 
 document.getElementById('edit-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
-  const productId = document.getElementById('edit-product-id').value;
-  
+
+  const productId = document.getElementById('editar-producto-id').value;
+
   const updates = {
-    code: document.getElementById('edit-code').value,
-    name: document.getElementById('edit-name').value,
-    unit: document.getElementById('edit-unit').value,
-    group: document.getElementById('edit-group').value,
-    stock: parseInt(document.getElementById('edit-stock').value) || 0,
-    minStock: parseInt(document.getElementById('edit-min-stock').value) || 5,
-    price: parseFloat(document.getElementById('edit-price').value) || 0,
-    warehouse: document.getElementById('edit-warehouse').value
+    codigo_producto: document.getElementById('editar-codigo-producto').value,
+    nombre_producto: document.getElementById('editar-nombre-producto').value,
+    unidad_producto: document.getElementById('editar-unidad-producto').value,
+    tipo_producto: document.getElementById('editar-tipo-producto').value,
+    stock_producto: parseInt(document.getElementById('editar-stock-producto').value) || 0,
+    stock_minimo: parseInt(document.getElementById('editar-stock-minimo').value) || 5,
+    precio_unitario: parseFloat(document.getElementById('editar-precio-unitario').value) || 0,
+    almacen_producto: document.getElementById('editar-almacen-producto').value
   };
-  
+
   try {
-    await updateDoc(doc(db, 'productos', productId), updates);
+    await updateDoc(
+      doc(db, 'producto', productId),
+      updates
+    );
+
     showToast('Producto actualizado correctamente');
     closeEditModal();
+
   } catch (error) {
     console.error('Error updating product:', error);
     showToast('Error al actualizar el producto', 'error');
@@ -418,7 +629,7 @@ window.deleteProduct = async function(productId) {
   if (!confirm('¿Esta seguro de eliminar este producto?')) return;
   
   try {
-    await deleteDoc(doc(db, 'productos', productId));
+    await deleteDoc(doc(db, 'producto', productId));
     showToast('Producto eliminado correctamente');
   } catch (error) {
     console.error('Error deleting product:', error);

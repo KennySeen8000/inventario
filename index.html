@@ -220,16 +220,16 @@
                 <label for="unidad-producto">Unidad de Medida *</label>
                 <select id="unidad-producto" required>
                   <option value="">Seleccionar...</option>
-                  <option value="unidad">Unidad</option>
-                  <option value="kg">Kilogramo (kg)</option>
-                  <option value="g">Gramo (g)</option>
-                  <option value="l">Litro (l)</option>
-                  <option value="ml">Mililitro (ml)</option>
-                  <option value="m">Metro (m)</option>
-                  <option value="cm">Centimetro (cm)</option>
-                  <option value="caja">Caja</option>
-                  <option value="paquete">Paquete</option>
-                  <option value="docena">Docena</option>
+                  <option value="0">Unidad</option>
+                  <option value="1">Kilogramo (kg)</option>
+                  <option value="2">Gramo (g)</option>
+                  <option value="3">Litro (l)</option>
+                  <option value="4">Mililitro (ml)</option>
+                  <option value="5">Metro (m)</option>
+                  <option value="6">Centimetro (cm)</option>
+                  <option value="7">Caja</option>
+                  <option value="8">Paquete</option>
+                  <option value="9">Docena</option>
                 </select>
               </div>
               
@@ -237,39 +237,39 @@
                 <label for="tipo-producto">Grupo *</label>
                 <select id="tipo-producto" required>
                   <option value="">Seleccionar...</option>
-                  <option value="electronica">Electronica</option>
-                  <option value="alimentos">Alimentos</option>
-                  <option value="bebidas">Bebidas</option>
-                  <option value="limpieza">Limpieza</option>
-                  <option value="papeleria">Papeleria</option>
-                  <option value="herramientas">Herramientas</option>
-                  <option value="ropa">Ropa</option>
-                  <option value="hogar">Hogar</option>
-                  <option value="otros">Otros</option>
+                  <option value="0">Electronica</option>
+                  <option value="1">Alimentos</option>
+                  <option value="2">Bebidas</option>
+                  <option value="3">Limpieza</option>
+                  <option value="4">Papeleria</option>
+                  <option value="5">Herramientas</option>
+                  <option value="6">Ropa</option>
+                  <option value="7">Hogar</option>
+                  <option value="8">Otros</option>
                 </select>
               </div>
               
               <div class="form-group">
-                <label for="stock-producto">Stock Inicial</label>
-                <input type="number" id="stock-producto" min="0" value="0" placeholder="0">
+                <label for="stock-producto">Stock Inicial *</label>
+                <input type="number" id="stock-producto" min="0" placeholder="0" required>
               </div>
               
               <div class="form-group">
-                <label for="stock-min-producto">Stock Minimo (Alerta)</label>
-                <input type="number" id="stock-min-producto" min="0" value="5" placeholder="5">
+                <label for="stock-min-producto">Stock Minimo * (Alerta)</label>
+                <input type="number" id="stock-min-producto" min="0" placeholder="20" required>
               </div>
               
               <div class="form-group">
-                <label for="precio-producto">Precio Unitario</label>
-                <input type="number" id="precio-producto" min="0" step="0.01" value="0" placeholder="0.00">
+                <label for="precio-producto">Precio Unitario *</label>
+                <input type="number" id="precio-producto" placeholder="0" required>
               </div>
               
               <div class="form-group">
-                <label for="almacen-producto">Almacen</label>
-                <select id="almacen-producto">
-                  <option value="principal">Principal</option>
-                  <option value="secundario">Secundario</option>
-                  <option value="bodega">Bodega</option>
+                <label for="almacen-producto">Almacén *</label>
+                <select id="almacen-producto" required>
+                  <option value="0">Principal</option>
+                  <option value="1">Secundario</option>
+                  <option value="2">Bodega</option>
                 </select>
               </div>
             </div>
@@ -317,9 +317,9 @@
                 <div class="form-group">
                   <label for="entry-warehouse">Almacen Destino</label>
                   <select id="entry-warehouse">
-                    <option value="principal">Principal</option>
-                    <option value="secundario">Secundario</option>
-                    <option value="bodega">Bodega</option>
+                    <option value="0">Principal</option>
+                    <option value="1">Secundario</option>
+                    <option value="2">Bodega</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -366,9 +366,9 @@
                 <div class="form-group">
                   <label for="exit-warehouse">Almacen Origen</label>
                   <select id="exit-warehouse">
-                    <option value="principal">Principal</option>
-                    <option value="secundario">Secundario</option>
-                    <option value="bodega">Bodega</option>
+                    <option value="0">Principal</option>
+                    <option value="1">Secundario</option>
+                    <option value="2">Bodega</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -417,17 +417,17 @@
                 <div class="form-group">
                   <label for="transfer-from">Almacen Origen *</label>
                   <select id="transfer-from" required>
-                    <option value="principal">Principal</option>
-                    <option value="secundario">Secundario</option>
-                    <option value="bodega">Bodega</option>
+                    <option value="0">Principal</option>
+                    <option value="1">Secundario</option>
+                    <option value="2">Bodega</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label for="transfer-to">Almacen Destino *</label>
                   <select id="transfer-to" required>
-                    <option value="secundario">Secundario</option>
-                    <option value="principal">Principal</option>
-                    <option value="bodega">Bodega</option>
+                    <option value="1">Secundario</option>
+                    <option value="0">Principal</option>
+                    <option value="2">Bodega</option>
                   </select>
                 </div>
               </div>
@@ -485,15 +485,15 @@
             <div class="filter-group">
               <select id="inventory-group-filter">
                 <option value="all">Todos los grupos</option>
-                <option value="electronica">Electronica</option>
-                <option value="alimentos">Alimentos</option>
-                <option value="bebidas">Bebidas</option>
-                <option value="limpieza">Limpieza</option>
-                <option value="papeleria">Papeleria</option>
-                <option value="herramientas">Herramientas</option>
-                <option value="ropa">Ropa</option>
-                <option value="hogar">Hogar</option>
-                <option value="otros">Otros</option>
+                <option value="0">Electronica</option>
+                <option value="1">Alimentos</option>
+                <option value="2">Bebidas</option>
+                <option value="3">Limpieza</option>
+                <option value="4">Papeleria</option>
+                <option value="5">Herramientas</option>
+                <option value="6">Ropa</option>
+                <option value="7">Hogar</option>
+                <option value="8">Otros</option>
               </select>
               <select id="inventory-status-filter">
                 <option value="all">Todos los estados</option>
@@ -508,12 +508,16 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Codigo</th>
-                    <th>Nombre</th>
-                    <th>Grupo</th>
+                    <td style="display:none;">${p.id}</td>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Tipo</th>
                     <th>Stock</th>
                     <th>Unidad</th>
-                    <th>Precio</th>
+                    <th>Precio Sin IVA</th>
+                    <th>Precio Con IVA</th>
+                    <th>Total Sin IVA</th>
+                    <th>Total Con IVA</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
@@ -668,19 +672,19 @@
         <button class="modal-close" onclick="closeEditModal()">&times;</button>
       </div>
       <form id="edit-form">
-        <input type="hidden" id="edit-product-id">
+        <input type="hidden" id="editar-producto-id">
         <div class="form-grid">
           <div class="form-group">
-            <label for="edit-code">Codigo</label>
-            <input type="text" id="edit-code" required>
+            <label for="editar-codigo-producto">Codigo</label>
+            <input type="text" id="editar-codigo-producto" required>
           </div>
           <div class="form-group">
-            <label for="edit-name">Nombre</label>
-            <input type="text" id="edit-name" required>
+            <label for="editar-nombre-producto">Nombre</label>
+            <input type="text" id="editar-nombre-producto" required>
           </div>
           <div class="form-group">
-            <label for="edit-unit">Unidad de Medida</label>
-            <select id="edit-unit" required>
+            <label for="editar-unidad-producto">Unidad de Medida</label>
+            <select id="editar-unidad-producto" required>
               <option value="unidad">Unidad</option>
               <option value="kg">Kilogramo (kg)</option>
               <option value="g">Gramo (g)</option>
@@ -694,37 +698,37 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="edit-group">Grupo</label>
-            <select id="edit-group" required>
-              <option value="electronica">Electronica</option>
-              <option value="alimentos">Alimentos</option>
-              <option value="bebidas">Bebidas</option>
-              <option value="limpieza">Limpieza</option>
-              <option value="papeleria">Papeleria</option>
-              <option value="herramientas">Herramientas</option>
-              <option value="ropa">Ropa</option>
-              <option value="hogar">Hogar</option>
-              <option value="otros">Otros</option>
+            <label for="editar-tipo-producto">Grupo</label>
+            <select id="editar-tipo-producto" required>
+              <option value="0">Electronica</option>
+              <option value="1">Alimentos</option>
+              <option value="2">Bebidas</option>
+              <option value="3">Limpieza</option>
+              <option value="4">Papeleria</option>
+              <option value="5">Herramientas</option>
+              <option value="6">Ropa</option>
+              <option value="7">Hogar</option>
+              <option value="8">Otros</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="edit-stock">Stock</label>
-            <input type="number" id="edit-stock" min="0">
+            <label for="editar-stock-producto">Stock</label>
+            <input type="number" id="editar-stock-producto" min="0">
           </div>
           <div class="form-group">
-            <label for="edit-min-stock">Stock Minimo</label>
-            <input type="number" id="edit-min-stock" min="0">
+            <label for="editar-stock-minimo">Stock Minimo</label>
+            <input type="number" id="editar-stock-minimo" min="0">
           </div>
           <div class="form-group">
-            <label for="edit-price">Precio</label>
-            <input type="number" id="edit-price" min="0" step="0.01">
+            <label for="editar-precio-unitario">Precio</label>
+            <input type="number" id="editar-precio-unitario" min="0" step="0.01">
           </div>
           <div class="form-group">
-            <label for="edit-warehouse">Almacen</label>
-            <select id="edit-warehouse">
-              <option value="principal">Principal</option>
-              <option value="secundario">Secundario</option>
-              <option value="bodega">Bodega</option>
+            <label for="editar-almacen-producto">Almacen</label>
+            <select id="editar-almacen-producto">
+              <option value="0">Principal</option>
+              <option value="1">Secundario</option>
+              <option value="2">Bodega</option>
             </select>
           </div>
         </div>
