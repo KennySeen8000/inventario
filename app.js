@@ -137,9 +137,9 @@ function showToast(message, type = 'success') {
 
 // ===== Format Helpers =====
 function formatCurrency(value) {
-  return new Intl.NumberFormat('es-MX', {
+  return new Intl.NumberFormat('es-CL', {
     style: 'currency',
-    currency: 'MXN'
+    currency: 'CLP'
   }).format(value);
 }
 
