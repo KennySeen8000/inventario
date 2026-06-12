@@ -169,7 +169,7 @@ function setupRealtimeListeners() {
       ...doc.data()
     }));
     updateDashboard();
-    updateInventoryTable();
+    // updateInventoryTable();
   }, (error) => {
     console.error('productos listener error:', error);
     updateConnectionStatus('error');
@@ -333,6 +333,120 @@ function updateStockAlerts() {
 //     showToast('Error al guardar el producto', 'error');
 //   }
 // });
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarUnidadesMedida();
+  cargarTipoProducto();
+  cargarAlmacenes();
+});
+
+//CARGAR UNIDADES DE MEDIDA
+async function cargarUnidadesMedida() {
+  try {
+    const select = document.getElementById("unidad-producto");
+
+    if (!select) {
+      console.error("No se encontró el select unidad-producto");
+      return;
+    }
+
+    select.innerHTML = '<option value="">Seleccionar...</option>';
+
+    const querySnapshot = await getDocs(collection(db, "unidad_medida"));
+
+    querySnapshot.forEach((documento) => {
+      const unidad = documento.data();
+
+      //  console.log(unidad);
+
+      const option = document.createElement("option");
+
+      option.value = unidad.codigo_unidad_medida;
+      option.textContent =
+        `${unidad.nombre_unidad_medida} (${unidad.abreviacion_unidad_medida})`;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error("Error al cargar unidades:", error);
+  }
+}
+
+//CARGAR TIPO producto
+async function cargarTipoProducto() {
+  try {
+    const select = document.getElementById("tipo-producto");
+
+    select.innerHTML = '<option value="">Seleccionar...</option>';
+
+    const querySnapshot = await getDocs(
+      collection(db, "tipo_producto")
+    );
+
+    querySnapshot.forEach((documento) => {
+      const grupo = documento.data();
+
+      const option = document.createElement("option");
+
+      option.value = grupo.codigo_tipo_producto;
+      option.textContent = grupo.nombre_tipo_producto;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error("Error al cargar grupos:", error);
+  }
+}
+
+async function cargarAlmacenes() {
+  try {
+    const select = document.getElementById("almacen-producto");
+
+    select.innerHTML = '<option value="">Seleccionar...</option>';
+
+    const querySnapshot = await getDocs(collection(db, "almacen"));
+
+    querySnapshot.forEach((documento) => {
+
+      const almacen = documento.data();
+      const option = document.createElement("option");
+
+      option.value = almacen.codigo_almacen_producto;
+      option.textContent = almacen.nombre_almacen_producto;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error("Error al cargar almacenes:", error);
+  }
+}
+
+// CARGAR EN BASE DE DATOS
+// window.cargarTiposProducto = async function() {
+//   const tiposProducto = [
+//     { codigo_almacen_producto: 0, nombre_almacen_producto: "Principal" },
+//     { codigo_almacen_producto: 1, nombre_almacen_producto: "Secundario" },
+//     { codigo_almacen_producto: 2, nombre_almacen_producto: "Bodega" }
+//   ];
+
+//   for (const tipo of tiposProducto) {
+//     await setDoc(
+//       doc(
+//         db,
+//         "almacen",
+//         tipo.codigo_almacen_producto.toString()
+//       ),
+//       tipo
+//     );
+//   }
+
+//   console.log("Tipos de producto cargados");
+// };
+// cargarTiposProducto();
+
 document.getElementById('formulario-producto').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -458,7 +572,6 @@ function updateInventoryTable() {
 
  
   let filtered = [...producto];
-  console.log("producto en inventario:", filtered);
 
   // Filtrar por tipo de producto
   if (groupFilter !== 'all') {
@@ -562,6 +675,8 @@ function updateInventoryTable() {
   </tr>
 `;
 }).join('');
+  // console.log("producto en inventario:", filtered);
+
 }
 
 document.getElementById('inventory-group-filter').addEventListener('change', updateInventoryTable);
