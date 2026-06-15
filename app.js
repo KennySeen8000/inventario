@@ -1,14 +1,14 @@
-// ===== Firebase Configuration =====
+// ===== Configuración de Firebase =====
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
+import {
+  getFirestore,
+  collection,
+  addDoc,
   setDoc,
-  getDocs, 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
   onSnapshot,
   query,
   orderBy,
@@ -16,7 +16,6 @@ import {
   Timestamp
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCGLhqCndD9zpSraPhYLAMul6jtvavcoek",
   authDomain: "inventario-49d3b.firebaseapp.com",
@@ -27,126 +26,59 @@ const firebaseConfig = {
   measurementId: "G-HRH7SSM5ZB"
 };
 
-// Initialize Firebase
+// ===== Estado global =====
 let app, db;
-let productos = [];
-let producto = [];
-let movements = [];
+let producto = [];      // documentos de la colección "producto"
+let movimientos = [];   // documentos de la colección "movimientos"
+
+// Mapas código -> nombre, para mostrar nombres en vez de códigos
+let mapaUnidades = {};
+let mapaTipos = {};
+let mapaAlmacenes = {};
+let mapaMotivos = {};
 
 try {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   updateConnectionStatus('connected');
 } catch (error) {
-  console.error('Firebase initialization error:', error);
+  console.error('Error al inicializar Firebase:', error);
   updateConnectionStatus('error');
 }
 
-// ===== Connection Status =====
+// ===== Estado de conexión =====
 function updateConnectionStatus(status) {
   const statusEl = document.getElementById('connection-status');
+  if (!statusEl) return;
   const dot = statusEl.querySelector('.status-dot');
   const text = statusEl.querySelector('.status-text');
-  
+
   dot.className = 'status-dot ' + status;
-  
-  switch(status) {
+
+  switch (status) {
     case 'connected':
       text.textContent = 'Conectado';
       break;
     case 'error':
-      text.textContent = 'Error de conexion';
+      text.textContent = 'Error de conexión';
       break;
     default:
       text.textContent = 'Conectando...';
   }
 }
 
-// const precioSinIva = p.precio_unitario || 0;
-// const precioConIva = precioSinIva * 1.19;
-
-// const totalSinIva = p.stock_producto * precioSinIva;
-// const totalConIva = p.stock_producto * precioConIva;
-
-function cargarProductos() {
-    onSnapshot(collection(db, "producto"), (querySnapshot) => {
-
-        producto = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));  
-        document.getElementById('total-productos').textContent = producto.length;
-  
-        updateInventoryTable();
-        // console.log("Cantidad de productos:", producto.length);
-    });
-}
-
-// ===== Navigation =====
-const navItems = document.querySelectorAll('.nav-item');
-const views = document.querySelectorAll('.view');
-
-navItems.forEach(item => {
-  item.addEventListener('click', () => {
-    const viewId = item.dataset.view;
-    
-    navItems.forEach(nav => nav.classList.remove('active'));
-    item.classList.add('active');
-    
-    views.forEach(view => view.classList.remove('active'));
-    document.getElementById(viewId + '-view').classList.add('active');
-    
-    // Close mobile sidebar
-    document.getElementById('sidebar').classList.remove('open');
-  });
-});
-
-// Mobile menu toggle
-document.getElementById('menu-toggle').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('open');
-});
-
-// ===== Tabs =====
-const tabs = document.querySelectorAll('.tab');
-const tabContents = document.querySelectorAll('.tab-content');
-
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    const tabId = tab.dataset.tab;
-    
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    
-    tabContents.forEach(content => content.classList.remove('active'));
-    document.getElementById(tabId + '-tab').classList.add('active');
-  });
-});
-
-// ===== Toast Notifications =====
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  const toastMessage = toast.querySelector('.toast-message');
-  
-  toastMessage.textContent = message;
-  toast.className = 'toast show ' + type;
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
-
-// ===== Format Helpers =====
+// ===== Helpers de formato =====
 function formatCurrency(value) {
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
     currency: 'CLP'
-  }).format(value);
+  }).format(Number(value) || 0);
 }
 
 function formatDate(timestamp) {
   if (!timestamp) return '-';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  return new Intl.DateTimeFormat('es-MX', {
+  return new Intl.DateTimeFormat('es-CL', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -156,108 +88,287 @@ function formatDate(timestamp) {
 }
 
 function capitalizeFirst(str) {
+  if (!str) return '';
+  str = String(str);
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// ===== Data Listeners =====
+// Devuelve el TEXTO de la opción seleccionada de un <select>
+function textoSeleccionado(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return '';
+  const opt = sel.options[sel.selectedIndex];
+  return opt ? opt.textContent : sel.value;
+}
+
+// Lookups para mostrar nombres a partir del código guardado
+const nombreUnidad  = (c) => mapaUnidades[String(c)]  || (c ?? '-');
+const nombreTipo    = (c) => mapaTipos[String(c)]     || (c ?? '-');
+const nombreAlmacen = (c) => mapaAlmacenes[String(c)] || (c ?? '-');
+
+// ===== Toast =====
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  const toastMessage = toast.querySelector('.toast-message');
+
+  toastMessage.textContent = message;
+  toast.className = 'toast show ' + type;
+
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ===== Navegación entre vistas =====
+const navItems = document.querySelectorAll('.nav-item');
+const views = document.querySelectorAll('.view');
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const viewId = item.dataset.view;
+    navItems.forEach(nav => nav.classList.remove('active'));
+    item.classList.add('active');
+    views.forEach(view => view.classList.remove('active'));
+    document.getElementById(viewId + '-view').classList.add('active');
+    document.getElementById('sidebar').classList.remove('open');
+  });
+});
+
+document.getElementById('menu-toggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+// ===== Pestañas (Movimientos) =====
+const tabs = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabId = tab.dataset.tab;
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    tabContents.forEach(content => content.classList.remove('active'));
+    document.getElementById(tabId + '-tab').classList.add('active');
+  });
+});
+
+// ===== Campos dinámicos =====
+function crearCampoUnidadMedida(idSelect) {
+  return `
+    <div class="form-group">
+      <label for="${idSelect}">Unidad de Medida *</label>
+      <select id="${idSelect}" required>
+        <option value="">Seleccionar...</option>
+      </select>
+    </div>`;
+}
+function crearCampoTipoProducto(idSelect) {
+  return `
+    <div class="form-group">
+      <label for="${idSelect}">Tipo de Producto *</label>
+      <select id="${idSelect}" required>
+        <option value="">Seleccionar...</option>
+      </select>
+    </div>`;
+}
+function crearCampoAlmacen(idSelect) {
+  return `
+    <div class="form-group">
+      <label for="${idSelect}">Almacén *</label>
+      <select id="${idSelect}" required>
+        <option value="">Seleccionar...</option>
+      </select>
+    </div>`;
+}
+function crearCampoMotivo(idSelect) {
+  return `
+    <div class="form-group">
+      <label for="${idSelect}">Motivo *</label>
+      <select id="${idSelect}" required>
+        <option value="">Seleccionar...</option>
+      </select>
+    </div>`;
+}
+
+// Inyectar los campos dinámicos (los <div> contenedores existen en el HTML)
+document.getElementById("campo-unidad-medida").innerHTML = crearCampoUnidadMedida("unidad-producto");
+document.getElementById("campo-tipo-producto").innerHTML = crearCampoTipoProducto("tipo-producto");
+document.getElementById("campo-almacen").innerHTML       = crearCampoAlmacen("almacen-producto");
+document.getElementById("campo-motivo").innerHTML        = crearCampoMotivo("motivo-movimiento");
+
+// ===== Carga de catálogos (selects) =====
+function llenarSelect(ids, items, placeholder = 'Seleccionar...') {
+  ids.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = `<option value="">${placeholder}</option>`;
+    items.forEach(it => {
+      const opt = document.createElement('option');
+      opt.value = String(it.value);
+      opt.textContent = it.text;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+async function cargarUnidadesMedida() {
+  try {
+    const snap = await getDocs(collection(db, 'unidad_medida'));
+    const items = [];
+    mapaUnidades = {};
+    snap.forEach(d => {
+      const u = d.data();
+      const text = `${u.nombre_unidad_medida} (${u.abreviacion_unidad_medida})`;
+      items.push({ value: u.codigo_unidad_medida, text });
+      mapaUnidades[String(u.codigo_unidad_medida)] = text;
+    });
+    llenarSelect(['unidad-producto', 'editar-unidad-producto'], items);
+  } catch (e) {
+    console.error('Error al cargar unidades:', e);
+  }
+}
+
+async function cargarTipoProducto() {
+  try {
+    const snap = await getDocs(collection(db, 'tipo_producto'));
+    const items = [];
+    mapaTipos = {};
+    snap.forEach(d => {
+      const t = d.data();
+      items.push({ value: t.codigo_tipo_producto, text: t.nombre_tipo_producto });
+      mapaTipos[String(t.codigo_tipo_producto)] = t.nombre_tipo_producto;
+    });
+    llenarSelect(['tipo-producto', 'editar-tipo-producto'], items);
+    // También el filtro de inventario
+    llenarSelect(['inventory-group-filter'], items, 'Todos los grupos');
+  } catch (e) {
+    console.error('Error al cargar tipos de producto:', e);
+  }
+}
+
+async function cargarAlmacenes() {
+  try {
+    const snap = await getDocs(collection(db, 'almacen'));
+    const items = [];
+    mapaAlmacenes = {};
+    snap.forEach(d => {
+      const a = d.data();
+      items.push({ value: a.codigo_almacen_producto, text: a.nombre_almacen_producto });
+      mapaAlmacenes[String(a.codigo_almacen_producto)] = a.nombre_almacen_producto;
+    });
+    // Producto + edición + todos los selects de almacén de movimientos
+    llenarSelect([
+      'almacen-producto',
+      'editar-almacen-producto',
+      'entry-warehouse',
+      'exit-warehouse',
+      'transfer-from',
+      'transfer-to'
+    ], items);
+  } catch (e) {
+    console.error('Error al cargar almacenes:', e);
+  }
+}
+
+async function cargarMotivos() {
+  try {
+    const snap = await getDocs(collection(db, 'motivo'));
+    const items = [];
+    mapaMotivos = {};
+    snap.forEach(d => {
+      const m = d.data();
+      items.push({ value: m.codigo_motivo, text: m.nombre_motivo });
+      mapaMotivos[String(m.codigo_motivo)] = m.nombre_motivo;
+    });
+    llenarSelect(['motivo-movimiento'], items);
+  } catch (e) {
+    console.error('Error al cargar motivos:', e);
+  }
+}
+
+// ===== Listeners en tiempo real =====
 function setupRealtimeListeners() {
-  // productos listener
-  const productosRef = collection(db, 'productos');
-  onSnapshot(productosRef, (snapshot) => {
-    productos = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+  // Productos
+  onSnapshot(collection(db, 'producto'), (snapshot) => {
+    producto = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     updateDashboard();
-    // updateInventoryTable();
+    updateInventoryTable();
+    updateConnectionStatus('connected');
   }, (error) => {
-    console.error('productos listener error:', error);
+    console.error('Error en listener de producto:', error);
     updateConnectionStatus('error');
   });
 
-  // Movements listener
-  const movementsRef = query(collection(db, 'movements'), orderBy('createdAt', 'desc'));
-  onSnapshot(movementsRef, (snapshot) => {
-    movements = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+  // Movimientos
+  const movRef = query(collection(db, 'movimientos'), orderBy('fecha_creacion', 'desc'));
+  onSnapshot(movRef, (snapshot) => {
+    movimientos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     updateDashboard();
     updateMovementsTable();
   }, (error) => {
-    console.error('Movements listener error:', error);
+    console.error('Error en listener de movimientos:', error);
   });
 }
 
 // ===== Dashboard =====
 function updateDashboard() {
-  // Total productos
-  producto = cargarProductos();
-  // console.log("cantidad",producto);
+  document.getElementById('total-productos').textContent = producto.length;
+  document.getElementById('total-movements').textContent = movimientos.length;
 
-  // console.log(producto.length);
-  // document.getElementById('total-productos').textContent = producto.length;
+  const totalValue = producto.reduce(
+    (sum, p) => sum + (Number(p.stock_producto) || 0) * (Number(p.precio_unitario) || 0),
+    0
+  );
+  document.getElementById('total-value').textContent = formatCurrency(totalValue);
 
-  // // Total movements
-  // document.getElementById('total-movements').textContent = movements.length;
+  const lowStock = producto.filter(
+    p => Number(p.stock_producto) > 0 && Number(p.stock_producto) <= Number(p.stock_minimo)
+  ).length;
+  document.getElementById('low-stock').textContent = lowStock;
 
-  // // Total value
-  // const totalValue = productos.reduce((sum, p) => sum + (p.stock * p.price), 0);
-  // document.getElementById('total-value').textContent = formatCurrency(totalValue);
-  
-  // // Low stock
-  // const lowStock = productos.filter(p => p.stock > 0 && p.stock <= p.minStock).length;
-  // document.getElementById('low-stock').textContent = lowStock;
-  
-  // // Out of stock
-  // const outOfStock = productos.filter(p => p.stock === 0).length;
-  // document.getElementById('out-of-stock').textContent = outOfStock;
-  
-  // // Recent movements
-  // updateRecentMovements();
-  
-  // // Stock alerts
-  // updateStockAlerts();
+  const outOfStock = producto.filter(p => Number(p.stock_producto) === 0).length;
+  document.getElementById('out-of-stock').textContent = outOfStock;
+
+  updateRecentMovements();
+  updateStockAlerts();
 }
 
 function updateRecentMovements() {
   const container = document.getElementById('recent-movements');
-  const recent = movements.slice(0, 5);
-  
+  const recent = movimientos.slice(0, 5);
+
   if (recent.length === 0) {
     container.innerHTML = '<div class="empty-state">No hay movimientos registrados</div>';
     return;
   }
-  
+
   container.innerHTML = recent.map(m => {
-    const iconClass = m.type === 'entrada' ? 'entry' : m.type === 'salida' ? 'exit' : 'transfer';
-    const icon = m.type === 'entrada' 
+    const iconClass = m.tipo_movimiento === 'entrada' ? 'entry'
+      : m.tipo_movimiento === 'salida' ? 'exit' : 'transfer';
+    const icon = m.tipo_movimiento === 'entrada'
       ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>'
-      : m.type === 'salida'
+      : m.tipo_movimiento === 'salida'
       ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>'
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>';
-    
+
     return `
       <div class="recent-item">
         <div class="recent-icon ${iconClass}">${icon}</div>
         <div class="recent-info">
-          <div class="recent-title">${m.productName} (${m.quantity})</div>
-          <div class="recent-meta">${capitalizeFirst(m.type)} - ${formatDate(m.createdAt)}</div>
+          <div class="recent-title">${m.nombre_producto} (${m.cantidad})</div>
+          <div class="recent-meta">${capitalizeFirst(m.tipo_movimiento)} - ${formatDate(m.fecha_creacion)}</div>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
 function updateStockAlerts() {
   const container = document.getElementById('stock-alerts');
-  const alerts = productos.filter(p => p.stock <= p.minStock);
-  
+  const alerts = producto.filter(p => Number(p.stock_producto) <= Number(p.stock_minimo));
+
   if (alerts.length === 0) {
     container.innerHTML = '<div class="empty-state">No hay alertas de stock</div>';
     return;
   }
-  
+
   container.innerHTML = alerts.slice(0, 5).map(p => `
     <div class="alert-item">
       <div class="alert-icon">
@@ -268,210 +379,35 @@ function updateStockAlerts() {
         </svg>
       </div>
       <div class="alert-info">
-        <div class="alert-title">${p.name}</div>
-        <div class="alert-meta">Stock: ${p.stock} / Min: ${p.minStock}</div>
+        <div class="alert-title">${p.nombre_producto}</div>
+        <div class="alert-meta">Stock: ${p.stock_producto} / Mín: ${p.stock_minimo}</div>
       </div>
-      <span class="badge ${p.stock === 0 ? 'badge-danger' : 'badge-warning'}">
-        ${p.stock === 0 ? 'Sin Stock' : 'Stock Bajo'}
+      <span class="badge ${Number(p.stock_producto) === 0 ? 'badge-danger' : 'badge-warning'}">
+        ${Number(p.stock_producto) === 0 ? 'Sin Stock' : 'Stock Bajo'}
       </span>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-// ===== Productos =====
-// document.getElementById('formulario-producto').addEventListener('submit', async (e) => {
-//   e.preventDefault();
-  
-//   const producto = {
-//     codigo_producto: document.getElementById('codigo-producto').value,
-//     nombre_producto: document.getElementById('nombre-producto').value,
-//     unidad_producto: document.getElementById('unidad-producto').value,
-//     tipo_producto: document.getElementById('tipo-producto').value,
-//     stock_producto: parseInt(document.getElementById('stock-producto').value) || 0,
-//     stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
-//     precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
-//     almacen_producto: document.getElementById('almacen-producto').value,
-//     fecha_creacion: Timestamp.now()
-//   };
-  
-//   try {
-//     await addDoc(collection(db, 'producto'), producto);
-//     showToast('Producto guardado correctamente');
-//     clearProductForm();
-//   } catch (error) {
-//     console.error('Error adding product:', error);
-//     showToast('Error al guardar el producto', 'error');
-//   }
-// });
-
-// document.getElementById('formulario-producto').addEventListener('submit', async (e) => {
-//   e.preventDefault();
-// length
-//   const productoRef = collection(db, 'producto');
-//   const snapshot = await getDocs(productoRef);
-
-//   const nuevoId = snapshot.size.toString();
-
-//   const producto = {
-//     codigo_producto: document.getElementById('codigo-producto').value,
-//     nombre_producto: document.getElementById('nombre-producto').value,
-//     unidad_producto: document.getElementById('unidad-producto').value,
-//     tipo_producto: document.getElementById('tipo-producto').value,
-//     stock_producto: parseInt(document.getElementById('stock-producto').value) || 0,
-//     stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
-//     precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
-//     almacen_producto: document.getElementById('almacen-producto').value,
-//     fecha_creacion: Timestamp.now()
-//   };
-
-//   try {
-//     await setDoc(doc(db, 'producto', nuevoId), producto);
-//     showToast('Producto guardado correctamente');
-//     clearProductForm();
-//   } catch (error) {
-//     console.error(error);
-//     showToast('Error al guardar el producto', 'error');
-//   }
-// });
-
-document.addEventListener("DOMContentLoaded", () => {
-  cargarUnidadesMedida();
-  cargarTipoProducto();
-  cargarAlmacenes();
-});
-
-//CARGAR UNIDADES DE MEDIDA
-async function cargarUnidadesMedida() {
-  try {
-    const select = document.getElementById("unidad-producto");
-
-    if (!select) {
-      console.error("No se encontró el select unidad-producto");
-      return;
-    }
-
-    select.innerHTML = '<option value="">Seleccionar...</option>';
-
-    const querySnapshot = await getDocs(collection(db, "unidad_medida"));
-
-    querySnapshot.forEach((documento) => {
-      const unidad = documento.data();
-
-      //  console.log(unidad);
-
-      const option = document.createElement("option");
-
-      option.value = unidad.codigo_unidad_medida;
-      option.textContent =
-        `${unidad.nombre_unidad_medida} (${unidad.abreviacion_unidad_medida})`;
-
-      select.appendChild(option);
-    });
-
-  } catch (error) {
-    console.error("Error al cargar unidades:", error);
-  }
-}
-
-//CARGAR TIPO producto
-async function cargarTipoProducto() {
-  try {
-    const select = document.getElementById("tipo-producto");
-
-    select.innerHTML = '<option value="">Seleccionar...</option>';
-
-    const querySnapshot = await getDocs(
-      collection(db, "tipo_producto")
-    );
-
-    querySnapshot.forEach((documento) => {
-      const grupo = documento.data();
-
-      const option = document.createElement("option");
-
-      option.value = grupo.codigo_tipo_producto;
-      option.textContent = grupo.nombre_tipo_producto;
-
-      select.appendChild(option);
-    });
-
-  } catch (error) {
-    console.error("Error al cargar grupos:", error);
-  }
-}
-
-async function cargarAlmacenes() {
-  try {
-    const select = document.getElementById("almacen-producto");
-
-    select.innerHTML = '<option value="">Seleccionar...</option>';
-
-    const querySnapshot = await getDocs(collection(db, "almacen"));
-
-    querySnapshot.forEach((documento) => {
-
-      const almacen = documento.data();
-      const option = document.createElement("option");
-
-      option.value = almacen.codigo_almacen_producto;
-      option.textContent = almacen.nombre_almacen_producto;
-
-      select.appendChild(option);
-    });
-
-  } catch (error) {
-    console.error("Error al cargar almacenes:", error);
-  }
-}
-
-// CARGAR EN BASE DE DATOS
-// window.cargarTiposProducto = async function() {
-//   const tiposProducto = [
-//     { codigo_almacen_producto: 0, nombre_almacen_producto: "Principal" },
-//     { codigo_almacen_producto: 1, nombre_almacen_producto: "Secundario" },
-//     { codigo_almacen_producto: 2, nombre_almacen_producto: "Bodega" }
-//   ];
-
-//   for (const tipo of tiposProducto) {
-//     await setDoc(
-//       doc(
-//         db,
-//         "almacen",
-//         tipo.codigo_almacen_producto.toString()
-//       ),
-//       tipo
-//     );
-//   }
-
-//   console.log("Tipos de producto cargados");
-// };
-// cargarTiposProducto();
-
+// ===== Alta de producto =====
 document.getElementById('formulario-producto').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const codigoProducto = document.getElementById('codigo-producto').value.trim();
 
   try {
-    // Validar si el código ya existe
-    const q = query(
-      collection(db, 'producto'),
-      where('codigo_producto', '==', codigoProducto)
-    );
-
+    // Validar código duplicado
+    const q = query(collection(db, 'producto'), where('codigo_producto', '==', codigoProducto));
     const codigoExistente = await getDocs(q);
-
     if (!codigoExistente.empty) {
-      alert('El código de producto ya existe. Por favor ingrese otro código.');
+      showToast('El código de producto ya existe. Ingrese otro.', 'error');
       return;
     }
 
-    // Obtener ID correlativo
-    const productoRef = collection(db, 'producto');
-    const snapshot = await getDocs(productoRef);
+    // ID correlativo
+    const snapshot = await getDocs(collection(db, 'producto'));
     const nuevoId = snapshot.size.toString();
 
-    const producto = {
+    const nuevoProducto = {
       codigo_producto: codigoProducto,
       nombre_producto: document.getElementById('nombre-producto').value,
       unidad_producto: document.getElementById('unidad-producto').value,
@@ -483,235 +419,113 @@ document.getElementById('formulario-producto').addEventListener('submit', async 
       fecha_creacion: Timestamp.now()
     };
 
-    await setDoc(doc(db, 'producto', nuevoId), producto);
-
+    await setDoc(doc(db, 'producto', nuevoId), nuevoProducto);
     showToast('Producto guardado correctamente');
     clearProductForm();
-
   } catch (error) {
-    console.error(error);
+    console.error('Error al guardar producto:', error);
     showToast('Error al guardar el producto', 'error');
   }
 });
 
-window.clearProductForm = function() {
+window.clearProductForm = function () {
   document.getElementById('formulario-producto').reset();
 };
 
-// ===== Inventory =====
-// function updateInventoryTable() {
-//   const tbody = document.getElementById('inventory-table');
-//   const groupFilter = document.getElementById('inventory-group-filter').value;
-//   const statusFilter = document.getElementById('inventory-status-filter').value;
-  
-//   let filtered = [...productos];
-  
-//   if (groupFilter !== 'all') {
-//     filtered = filtered.filter(p => p.group === groupFilter);
-//   }
-  
-//   if (statusFilter !== 'all') {
-//     filtered = filtered.filter(p => {
-//       if (statusFilter === 'available') return p.stock > p.minStock;
-//       if (statusFilter === 'low') return p.stock > 0 && p.stock <= p.minStock;
-//       if (statusFilter === 'out') return p.stock === 0;
-//       return true;
-//     });
-//   }
-  
-//   if (filtered.length === 0) {
-//     tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay productos que mostrar</td></tr>';
-//     return;
-//   }
-  
-//   tbody.innerHTML = filtered.map(p => {
-//     let status, badgeClass;
-//     if (p.stock === 0) {
-//       status = 'Sin Stock';
-//       badgeClass = 'badge-danger';
-//     } else if (p.stock <= p.minStock) {
-//       status = 'Stock Bajo';
-//       badgeClass = 'badge-warning';
-//     } else {
-//       status = 'Disponible';
-//       badgeClass = 'badge-success';
-//     }
-    
-//     return `
-//       <tr>
-//         <td>${p.code}</td>
-//         <td>${p.name}</td>
-//         <td>${capitalizeFirst(p.group)}</td>
-//         <td>${p.stock}</td>
-//         <td>${p.unit}</td>
-//         <td>${formatCurrency(p.price)}</td>
-//         <td><span class="badge ${badgeClass}">${status}</span></td>
-//         <td class="actions">
-//           <button class="btn-icon" onclick="openEditModal('${p.id}')" title="Editar">
-//             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-//               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-//               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-//             </svg>
-//           </button>
-//           <button class="btn-icon" onclick="deleteProduct('${p.id}')" title="Eliminar">
-//             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-//               <polyline points="3 6 5 6 21 6"></polyline>
-//               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-//             </svg>
-//           </button>
-//         </td>
-//       </tr>
-//     `;
-//   }).join('');
-// }
-
+// ===== Tabla de inventario =====
 function updateInventoryTable() {
   const tbody = document.getElementById('inventory-table');
   const groupFilter = document.getElementById('inventory-group-filter').value;
   const statusFilter = document.getElementById('inventory-status-filter').value;
 
- 
   let filtered = [...producto];
 
-  // Filtrar por tipo de producto
-  if (groupFilter !== 'all') {
-    filtered = filtered.filter(
-      p => p.tipo_producto === groupFilter
-    );
+  if (groupFilter !== 'all' && groupFilter !== '') {
+    filtered = filtered.filter(p => String(p.tipo_producto) === String(groupFilter));
   }
 
-  // Filtrar por estado de stock
   if (statusFilter !== 'all') {
     filtered = filtered.filter(p => {
-      if (statusFilter === 'available') {
-        return p.stock_producto > p.stock_minimo;
-      }
-
-      if (statusFilter === 'low') {
-        return (
-          p.stock_producto > 0 &&
-          p.stock_producto <= p.stock_minimo
-        );
-      }
-
-      if (statusFilter === 'out') {
-        return p.stock_producto === 0;
-      }
-
+      const stock = Number(p.stock_producto);
+      const min = Number(p.stock_minimo);
+      if (statusFilter === 'available') return stock > min;
+      if (statusFilter === 'low') return stock > 0 && stock <= min;
+      if (statusFilter === 'out') return stock === 0;
       return true;
     });
   }
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="empty-state">
-          No hay producto que mostrar
-        </td>
-      </tr>
-    `;
+    tbody.innerHTML = '<tr><td colspan="11" class="empty-state">No hay productos que mostrar</td></tr>';
     return;
   }
 
   tbody.innerHTML = filtered.map(p => {
+    const precioSinIva = Number(p.precio_unitario) || 0;
+    const precioConIva = precioSinIva * 1.19;
+    const stock = Number(p.stock_producto) || 0;
+    const totalSinIva = stock * precioSinIva;
+    const totalConIva = stock * precioConIva;
 
-  const precioSinIva = p.precio_unitario || 0;
-  const precioConIva = precioSinIva * 1.19;
+    let status, badgeClass;
+    if (stock === 0) {
+      status = 'Sin Stock'; badgeClass = 'badge-danger';
+    } else if (stock <= Number(p.stock_minimo)) {
+      status = 'Stock Bajo'; badgeClass = 'badge-warning';
+    } else {
+      status = 'Disponible'; badgeClass = 'badge-success';
+    }
 
-  const totalSinIva = p.stock_producto * precioSinIva;
-  const totalConIva = p.stock_producto * precioConIva;
-
-  let status;
-  let badgeClass;
-
-  if (p.stock_producto === 0) {
-    status = 'Sin Stock';
-    badgeClass = 'badge-danger';
-  } else if (p.stock_producto <= p.stock_minimo) {
-    status = 'Stock Bajo';
-    badgeClass = 'badge-warning';
-  } else {
-    status = 'Disponible';
-    badgeClass = 'badge-success';
-  }
-
-  return `
-  <tr data-id="${p.id}">
-    <td>${p.codigo_producto}</td>
-    <td>${p.nombre_producto}</td>
-    <td>${p.tipo_producto}</td>
-    <td>${p.stock_producto}</td>
-    <td>${p.unidad_producto}</td>
-
-    <td>${formatCurrency(precioSinIva)}</td>
-    <td>${formatCurrency(precioConIva)}</td>
-
-    <td>${formatCurrency(totalSinIva)}</td>
-    <td>${formatCurrency(totalConIva)}</td>
-
-    <td>
-      <span class="badge ${badgeClass}">
-        ${status}
-      </span>
-    </td>
-
-    <td class="actions">
-      <button
-        class="btn-icon"
-        onclick="openEditModal('${p.id}')"
-        title="Editar"
-      >
-        ✏️
-      </button>
-
-      <button
-        class="btn-icon"
-        onclick="deleteProduct('${p.id}')"
-        title="Eliminar"
-      >
-        🗑️
-      </button>
-    </td>
-  </tr>
-`;
-}).join('');
-  // console.log("producto en inventario:", filtered);
-
+    return `
+      <tr data-id="${p.id}">
+        <td>${p.codigo_producto}</td>
+        <td>${p.nombre_producto}</td>
+        <td>${nombreTipo(p.tipo_producto)}</td>
+        <td>${stock}</td>
+        <td>${nombreUnidad(p.unidad_producto)}</td>
+        <td>${formatCurrency(precioSinIva)}</td>
+        <td>${formatCurrency(precioConIva)}</td>
+        <td>${formatCurrency(totalSinIva)}</td>
+        <td>${formatCurrency(totalConIva)}</td>
+        <td><span class="badge ${badgeClass}">${status}</span></td>
+        <td class="actions">
+          <button class="btn-icon" onclick="openEditModal('${p.id}')" title="Editar">✏️</button>
+          <button class="btn-icon" onclick="deleteProduct('${p.id}')" title="Eliminar">🗑️</button>
+        </td>
+      </tr>`;
+  }).join('');
 }
 
 document.getElementById('inventory-group-filter').addEventListener('change', updateInventoryTable);
 document.getElementById('inventory-status-filter').addEventListener('change', updateInventoryTable);
 
-// ===== Edit Modal =====
-window.openEditModal = function(productId) {
-
-  const productoSeleccionado = producto.find(p => p.id === productId);
-
-  if (!productoSeleccionado) {
-    console.error("Producto no encontrado:", productId);
+// ===== Modal de edición =====
+window.openEditModal = function (productId) {
+  const p = producto.find(x => x.id === productId);
+  if (!p) {
+    console.error('Producto no encontrado:', productId);
     return;
   }
 
-  document.getElementById('editar-producto-id').value = productoSeleccionado.id;
-  document.getElementById('editar-codigo-producto').value = productoSeleccionado.codigo_producto;
-  document.getElementById('editar-nombre-producto').value = productoSeleccionado.nombre_producto;
-  document.getElementById('editar-unidad-producto').value = productoSeleccionado.unidad_producto;
-  document.getElementById('editar-tipo-producto').value = productoSeleccionado.tipo_producto;
-  document.getElementById('editar-stock-producto').value = productoSeleccionado.stock_producto;
-  document.getElementById('editar-stock-minimo').value = productoSeleccionado.stock_minimo;
-  document.getElementById('editar-precio-unitario').value = productoSeleccionado.precio_unitario;
-  document.getElementById('editar-almacen-producto').value = productoSeleccionado.almacen_producto;
+  document.getElementById('editar-producto-id').value = p.id;
+  document.getElementById('editar-codigo-producto').value = p.codigo_producto;
+  document.getElementById('editar-nombre-producto').value = p.nombre_producto;
+  document.getElementById('editar-unidad-producto').value = p.unidad_producto;
+  document.getElementById('editar-tipo-producto').value = p.tipo_producto;
+  document.getElementById('editar-stock-producto').value = p.stock_producto;
+  document.getElementById('editar-stock-minimo').value = p.stock_minimo;
+  document.getElementById('editar-precio-unitario').value = p.precio_unitario;
+  document.getElementById('editar-almacen-producto').value = p.almacen_producto;
 
   document.getElementById('edit-modal').classList.add('active');
 };
 
-window.closeEditModal = function() {
+window.closeEditModal = function () {
   document.getElementById('edit-modal').classList.remove('active');
 };
 
 document.getElementById('edit-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-
   const productId = document.getElementById('editar-producto-id').value;
 
   const updates = {
@@ -726,217 +540,204 @@ document.getElementById('edit-form').addEventListener('submit', async (e) => {
   };
 
   try {
-    await updateDoc(
-      doc(db, 'producto', productId),
-      updates
-    );
-
+    await updateDoc(doc(db, 'producto', productId), updates);
     showToast('Producto actualizado correctamente');
     closeEditModal();
-
   } catch (error) {
-    console.error('Error updating product:', error);
+    console.error('Error al actualizar producto:', error);
     showToast('Error al actualizar el producto', 'error');
   }
 });
 
-window.deleteProduct = async function(productId) {
-  if (!confirm('¿Esta seguro de eliminar este producto?')) return;
-  
+window.deleteProduct = async function (productId) {
+  if (!confirm('¿Está seguro de eliminar este producto?')) return;
   try {
     await deleteDoc(doc(db, 'producto', productId));
     showToast('Producto eliminado correctamente');
   } catch (error) {
-    console.error('Error deleting product:', error);
+    console.error('Error al eliminar producto:', error);
     showToast('Error al eliminar el producto', 'error');
   }
 };
 
-// ===== Movements =====
-// Entry form
+// ===== Movimientos =====
+// Entrada
 document.getElementById('entry-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const productId = document.getElementById('entry-product-id').value;
-  const product = productos.find(p => p.id === productId);
-  
-  if (!product) {
-    showToast('Debe seleccionar un producto valido de la lista', 'error');
+  const prod = producto.find(p => p.id === productId);
+  if (!prod) {
+    showToast('Debe seleccionar un producto válido de la lista', 'error');
     return;
   }
-  
-  const quantity = parseInt(document.getElementById('entry-quantity').value);
-  const warehouse = document.getElementById('entry-warehouse').value;
-  const reason = document.getElementById('entry-reason').value;
-  
-  if (!reason) {
+
+  const cantidad = parseInt(document.getElementById('entry-quantity').value);
+  const almacen = textoSeleccionado('entry-warehouse');
+  const motivo = textoSeleccionado('motivo-movimiento');
+
+  if (!document.getElementById('motivo-movimiento').value) {
     showToast('Debe seleccionar un motivo', 'error');
     return;
   }
-  
+
   try {
-    // Add movement
-    await addDoc(collection(db, 'movements'), {
-      type: 'entrada',
-      productId,
-      productName: product.name,
-      productCode: product.code,
-      quantity,
-      warehouse,
-      reason,
-      createdAt: Timestamp.now()
+    await addDoc(collection(db, 'movimientos'), {
+      tipo_movimiento: 'entrada',
+      producto_id: productId,
+      codigo_producto: prod.codigo_producto,
+      nombre_producto: prod.nombre_producto,
+      cantidad,
+      almacen,
+      motivo,
+      fecha_creacion: Timestamp.now()
     });
-    
-    // Update product stock
-    await updateDoc(doc(db, 'productos', productId), {
-      stock: product.stock + quantity
+
+    await updateDoc(doc(db, 'producto', productId), {
+      stock_producto: (Number(prod.stock_producto) || 0) + cantidad
     });
-    
-    showToast(`Entrada de ${quantity} unidades registrada`);
+
+    showToast(`Entrada de ${cantidad} unidades registrada`);
     document.getElementById('entry-form').reset();
     document.getElementById('entry-product-id').value = '';
   } catch (error) {
-    console.error('Error registering entry:', error);
+    console.error('Error al registrar entrada:', error);
     showToast('Error al registrar la entrada', 'error');
   }
 });
 
-// Exit form
+// Salida
 document.getElementById('exit-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const productId = document.getElementById('exit-product-id').value;
-  const product = productos.find(p => p.id === productId);
-  
-  if (!product) {
-    showToast('Debe seleccionar un producto valido de la lista', 'error');
+  const prod = producto.find(p => p.id === productId);
+  if (!prod) {
+    showToast('Debe seleccionar un producto válido de la lista', 'error');
     return;
   }
-  
-  const quantity = parseInt(document.getElementById('exit-quantity').value);
-  
-  if (quantity > product.stock) {
+
+  const cantidad = parseInt(document.getElementById('exit-quantity').value);
+  if (cantidad > (Number(prod.stock_producto) || 0)) {
     showToast('No hay suficiente stock disponible', 'error');
     return;
   }
-  
-  const warehouse = document.getElementById('exit-warehouse').value;
-  const reason = document.getElementById('exit-reason').value;
-  
-  if (!reason) {
+
+  const almacen = textoSeleccionado('exit-warehouse');
+  const motivo = textoSeleccionado('exit-reason');
+
+  if (!document.getElementById('exit-reason').value) {
     showToast('Debe seleccionar un motivo', 'error');
     return;
   }
-  
+
   try {
-    await addDoc(collection(db, 'movements'), {
-      type: 'salida',
-      productId,
-      productName: product.name,
-      productCode: product.code,
-      quantity,
-      warehouse,
-      reason,
-      createdAt: Timestamp.now()
+    await addDoc(collection(db, 'movimientos'), {
+      tipo_movimiento: 'salida',
+      producto_id: productId,
+      codigo_producto: prod.codigo_producto,
+      nombre_producto: prod.nombre_producto,
+      cantidad,
+      almacen,
+      motivo,
+      fecha_creacion: Timestamp.now()
     });
-    
-    await updateDoc(doc(db, 'productos', productId), {
-      stock: product.stock - quantity
+
+    await updateDoc(doc(db, 'producto', productId), {
+      stock_producto: (Number(prod.stock_producto) || 0) - cantidad
     });
-    
-    showToast(`Salida de ${quantity} unidades registrada`);
+
+    showToast(`Salida de ${cantidad} unidades registrada`);
     document.getElementById('exit-form').reset();
     document.getElementById('exit-product-id').value = '';
   } catch (error) {
-    console.error('Error registering exit:', error);
+    console.error('Error al registrar salida:', error);
     showToast('Error al registrar la salida', 'error');
   }
 });
 
-// Transfer form
+// Transferencia (no cambia el stock total, solo se registra)
 document.getElementById('transfer-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const productId = document.getElementById('transfer-product-id').value;
-  const product = productos.find(p => p.id === productId);
-  
-  if (!product) {
-    showToast('Debe seleccionar un producto valido de la lista', 'error');
+  const prod = producto.find(p => p.id === productId);
+  if (!prod) {
+    showToast('Debe seleccionar un producto válido de la lista', 'error');
     return;
   }
-  
-  const quantity = parseInt(document.getElementById('transfer-quantity').value);
-  const fromWarehouse = document.getElementById('transfer-from').value;
-  const toWarehouse = document.getElementById('transfer-to').value;
-  
-  if (fromWarehouse === toWarehouse) {
-    showToast('El almacen origen y destino deben ser diferentes', 'error');
+
+  const cantidad = parseInt(document.getElementById('transfer-quantity').value);
+  const fromVal = document.getElementById('transfer-from').value;
+  const toVal = document.getElementById('transfer-to').value;
+  const fromTxt = textoSeleccionado('transfer-from');
+  const toTxt = textoSeleccionado('transfer-to');
+
+  if (fromVal === toVal) {
+    showToast('El almacén origen y destino deben ser diferentes', 'error');
     return;
   }
-  
-  if (quantity > product.stock) {
+  if (cantidad > (Number(prod.stock_producto) || 0)) {
     showToast('No hay suficiente stock disponible', 'error');
     return;
   }
-  
+
   try {
-    await addDoc(collection(db, 'movements'), {
-      type: 'transferencia',
-      productId,
-      productName: product.name,
-      productCode: product.code,
-      quantity,
-      warehouse: `${capitalizeFirst(fromWarehouse)} → ${capitalizeFirst(toWarehouse)}`,
-      reason: 'TRANSFERENCIA ENTRE ALMACENES',
-      createdAt: Timestamp.now()
+    await addDoc(collection(db, 'movimientos'), {
+      tipo_movimiento: 'transferencia',
+      producto_id: productId,
+      codigo_producto: prod.codigo_producto,
+      nombre_producto: prod.nombre_producto,
+      cantidad,
+      almacen: `${fromTxt} → ${toTxt}`,
+      motivo: 'TRANSFERENCIA ENTRE ALMACENES',
+      fecha_creacion: Timestamp.now()
     });
-    
-    showToast(`Transferencia de ${quantity} unidades registrada`);
+
+    showToast(`Transferencia de ${cantidad} unidades registrada`);
     document.getElementById('transfer-form').reset();
     document.getElementById('transfer-product-id').value = '';
   } catch (error) {
-    console.error('Error registering transfer:', error);
+    console.error('Error al registrar transferencia:', error);
     showToast('Error al registrar la transferencia', 'error');
   }
 });
 
-// Movements table
+// Historial de movimientos
 function updateMovementsTable() {
   const tbody = document.getElementById('movements-table');
   const filter = document.getElementById('history-filter').value;
-  
-  let filtered = [...movements];
-  
+
+  let filtered = [...movimientos];
   if (filter !== 'all') {
-    filtered = filtered.filter(m => m.type === filter);
+    filtered = filtered.filter(m => m.tipo_movimiento === filter);
   }
-  
+
   if (filtered.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay movimientos que mostrar</td></tr>';
     return;
   }
-  
+
   tbody.innerHTML = filtered.map(m => {
-    const badgeClass = m.type === 'entrada' ? 'badge-success' : m.type === 'salida' ? 'badge-danger' : 'badge-blue';
-    
+    const badgeClass = m.tipo_movimiento === 'entrada' ? 'badge-success'
+      : m.tipo_movimiento === 'salida' ? 'badge-danger' : 'badge-blue';
     return `
       <tr>
-        <td>${formatDate(m.createdAt)}</td>
-        <td><span class="badge ${badgeClass}">${capitalizeFirst(m.type)}</span></td>
-        <td>${m.productName}</td>
-        <td>${m.quantity}</td>
-        <td>${capitalizeFirst(m.warehouse)}</td>
-        <td>${m.reason}</td>
-      </tr>
-    `;
+        <td>${formatDate(m.fecha_creacion)}</td>
+        <td><span class="badge ${badgeClass}">${capitalizeFirst(m.tipo_movimiento)}</span></td>
+        <td>${m.nombre_producto}</td>
+        <td>${m.cantidad}</td>
+        <td>${m.almacen}</td>
+        <td>${m.motivo}</td>
+      </tr>`;
   }).join('');
 }
 
 document.getElementById('history-filter').addEventListener('change', updateMovementsTable);
 
-// ===== Uppercase Inputs =====
+// ===== Inputs en mayúscula =====
 document.querySelectorAll('.uppercase-input').forEach(input => {
-  input.addEventListener('input', function() {
+  input.addEventListener('input', function () {
     const start = this.selectionStart;
     const end = this.selectionEnd;
     this.value = this.value.toUpperCase();
@@ -944,57 +745,47 @@ document.querySelectorAll('.uppercase-input').forEach(input => {
   });
 });
 
-// ===== Product Autocomplete =====
+// ===== Autocompletado de productos =====
 function setupAutocomplete(inputId, listId, hiddenId) {
   const input = document.getElementById(inputId);
   const list = document.getElementById(listId);
   const hidden = document.getElementById(hiddenId);
-  
   if (!input || !list) return;
-  
+
   let selectedIndex = -1;
-  
-  input.addEventListener('input', function() {
+
+  input.addEventListener('input', function () {
     const value = this.value.toUpperCase().trim();
     hidden.value = '';
-    
-    if (value.length < 1) {
-      list.classList.remove('show');
-      return;
-    }
-    
-    const matches = productos.filter(p => 
-      p.code.toUpperCase().includes(value) || 
-      p.name.toUpperCase().includes(value)
+
+    if (value.length < 1) { list.classList.remove('show'); return; }
+
+    const matches = producto.filter(p =>
+      String(p.codigo_producto).toUpperCase().includes(value) ||
+      String(p.nombre_producto).toUpperCase().includes(value)
     ).slice(0, 8);
-    
-    if (matches.length === 0) {
-      list.classList.remove('show');
-      return;
-    }
-    
+
+    if (matches.length === 0) { list.classList.remove('show'); return; }
+
     list.innerHTML = matches.map((p, idx) => `
-      <div class="autocomplete-item" data-id="${p.id}" data-code="${p.code}" data-name="${p.name}" data-index="${idx}">
-        <span class="product-code">${p.code}</span>
-        <span class="product-name">- ${p.name}</span>
-        <span class="product-stock">Stock: ${p.stock} ${p.unit}</span>
-      </div>
-    `).join('');
-    
+      <div class="autocomplete-item" data-id="${p.id}" data-code="${p.codigo_producto}" data-name="${p.nombre_producto}" data-index="${idx}">
+        <span class="product-code">${p.codigo_producto}</span>
+        <span class="product-name">- ${p.nombre_producto}</span>
+        <span class="product-stock">Stock: ${p.stock_producto} ${nombreUnidad(p.unidad_producto)}</span>
+      </div>`).join('');
+
     list.classList.add('show');
     selectedIndex = -1;
-    
-    // Add click handlers
+
     list.querySelectorAll('.autocomplete-item').forEach(item => {
-      item.addEventListener('click', function() {
-        selectProduct(input, hidden, list, this.dataset.id, this.dataset.code, this.dataset.name);
+      item.addEventListener('click', function () {
+        selectProduct(input, hidden, list, this.dataset.id, this.dataset.code);
       });
     });
   });
-  
-  input.addEventListener('keydown', function(e) {
+
+  input.addEventListener('keydown', function (e) {
     const items = list.querySelectorAll('.autocomplete-item');
-    
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
@@ -1006,242 +797,238 @@ function setupAutocomplete(inputId, listId, hiddenId) {
     } else if (e.key === 'Enter' && selectedIndex >= 0) {
       e.preventDefault();
       const item = items[selectedIndex];
-      if (item) {
-        selectProduct(input, hidden, list, item.dataset.id, item.dataset.code, item.dataset.name);
-      }
+      if (item) selectProduct(input, hidden, list, item.dataset.id, item.dataset.code);
     } else if (e.key === 'Escape') {
       list.classList.remove('show');
     }
   });
-  
-  input.addEventListener('blur', function() {
+
+  input.addEventListener('blur', function () {
     setTimeout(() => list.classList.remove('show'), 200);
   });
 }
 
 function updateSelection(items, index) {
-  items.forEach((item, i) => {
-    item.classList.toggle('active', i === index);
-  });
+  items.forEach((item, i) => item.classList.toggle('active', i === index));
 }
 
-function selectProduct(input, hidden, list, id, code, name) {
+function selectProduct(input, hidden, list, id, code) {
   input.value = code;
   hidden.value = id;
   list.classList.remove('show');
 }
 
-// Initialize autocomplete for all product inputs
 setupAutocomplete('entry-product', 'entry-product-list', 'entry-product-id');
 setupAutocomplete('exit-product', 'exit-product-list', 'exit-product-id');
 setupAutocomplete('transfer-product', 'transfer-product-list', 'transfer-product-id');
 
-// ===== Reports =====
+// ===== Reportes =====
 let currentReportData = [];
 let currentReportType = '';
 
-window.generateInventoryReport = function() {
+window.generateInventoryReport = function () {
   currentReportType = 'inventory';
-  currentReportData = productos.map(p => ({
-    Codigo: p.code,
-    Nombre: p.name,
-    Grupo: capitalizeFirst(p.group),
-    Stock: p.stock,
-    Unidad: p.unit,
-    Precio: p.price,
-    'Valor Total': p.stock * p.price,
-    Estado: p.stock === 0 ? 'Sin Stock' : p.stock <= p.minStock ? 'Stock Bajo' : 'Disponible'
-  }));
-  
+  currentReportData = producto.map(p => {
+    const stock = Number(p.stock_producto) || 0;
+    const precio = Number(p.precio_unitario) || 0;
+    return {
+      Codigo: p.codigo_producto,
+      Nombre: p.nombre_producto,
+      Tipo: nombreTipo(p.tipo_producto),
+      Stock: stock,
+      Unidad: nombreUnidad(p.unidad_producto),
+      Precio: precio,
+      'Valor Total': stock * precio,
+      Estado: stock === 0 ? 'Sin Stock' : stock <= Number(p.stock_minimo) ? 'Stock Bajo' : 'Disponible'
+    };
+  });
   displayReport('Reporte de Inventario Actual', currentReportData);
 };
 
-window.generateMovementsReport = function() {
+window.generateMovementsReport = function () {
   const from = document.getElementById('report-date-from').value;
   const to = document.getElementById('report-date-to').value;
-  
+
   currentReportType = 'movements';
-  let filtered = [...movements];
-  
+  let filtered = [...movimientos];
+
   if (from) {
     const fromDate = new Date(from);
     filtered = filtered.filter(m => {
-      const date = m.createdAt.toDate ? m.createdAt.toDate() : new Date(m.createdAt);
+      const date = m.fecha_creacion?.toDate ? m.fecha_creacion.toDate() : new Date(m.fecha_creacion);
       return date >= fromDate;
     });
   }
-  
   if (to) {
     const toDate = new Date(to);
     toDate.setHours(23, 59, 59);
     filtered = filtered.filter(m => {
-      const date = m.createdAt.toDate ? m.createdAt.toDate() : new Date(m.createdAt);
+      const date = m.fecha_creacion?.toDate ? m.fecha_creacion.toDate() : new Date(m.fecha_creacion);
       return date <= toDate;
     });
   }
-  
+
   currentReportData = filtered.map(m => ({
-    Fecha: formatDate(m.createdAt),
-    Tipo: capitalizeFirst(m.type),
-    Producto: m.productName,
-    Codigo: m.productCode,
-    Cantidad: m.quantity,
-    Almacen: capitalizeFirst(m.warehouse),
-    Motivo: m.reason
+    Fecha: formatDate(m.fecha_creacion),
+    Tipo: capitalizeFirst(m.tipo_movimiento),
+    Producto: m.nombre_producto,
+    Codigo: m.codigo_producto,
+    Cantidad: m.cantidad,
+    Almacen: m.almacen,
+    Motivo: m.motivo
   }));
-  
   displayReport('Reporte de Movimientos', currentReportData);
 };
 
-window.generateLowStockReport = function() {
+window.generateLowStockReport = function () {
   currentReportType = 'lowstock';
-  const lowStockproductos = productos.filter(p => p.stock <= p.minStock);
-  
-  currentReportData = lowStockproductos.map(p => ({
-    Codigo: p.code,
-    Nombre: p.name,
-    Grupo: capitalizeFirst(p.group),
-    'Stock Actual': p.stock,
-    'Stock Minimo': p.minStock,
-    Diferencia: p.minStock - p.stock,
-    Estado: p.stock === 0 ? 'Sin Stock' : 'Stock Bajo'
+  const bajos = producto.filter(p => Number(p.stock_producto) <= Number(p.stock_minimo));
+  currentReportData = bajos.map(p => ({
+    Codigo: p.codigo_producto,
+    Nombre: p.nombre_producto,
+    Tipo: nombreTipo(p.tipo_producto),
+    'Stock Actual': p.stock_producto,
+    'Stock Minimo': p.stock_minimo,
+    Diferencia: Number(p.stock_minimo) - Number(p.stock_producto),
+    Estado: Number(p.stock_producto) === 0 ? 'Sin Stock' : 'Stock Bajo'
   }));
-  
   displayReport('Reporte de Productos con Stock Bajo', currentReportData);
 };
 
 function displayReport(title, data) {
   document.getElementById('report-title').textContent = title;
-  
   const resultEl = document.getElementById('report-result');
   const thead = document.getElementById('report-thead');
   const tbody = document.getElementById('report-tbody');
-  
+
   if (data.length === 0) {
     thead.innerHTML = '';
     tbody.innerHTML = '<tr><td class="empty-state">No hay datos para mostrar</td></tr>';
     resultEl.style.display = 'block';
     return;
   }
-  
+
   const headers = Object.keys(data[0]);
   thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-  
-  tbody.innerHTML = data.map(row => 
+  tbody.innerHTML = data.map(row =>
     `<tr>${headers.map(h => {
       let value = row[h];
       if (h === 'Precio' || h === 'Valor Total') value = formatCurrency(value);
       return `<td>${value}</td>`;
     }).join('')}</tr>`
   ).join('');
-  
+
   resultEl.style.display = 'block';
 }
 
-window.exportReportCSV = function() {
+window.exportReportCSV = function () {
   if (currentReportData.length === 0) {
     showToast('No hay datos para exportar', 'error');
     return;
   }
-  
   const headers = Object.keys(currentReportData[0]);
   const csvContent = [
     headers.join(','),
-    ...currentReportData.map(row => 
+    ...currentReportData.map(row =>
       headers.map(h => {
         let value = row[h];
-        if (typeof value === 'string' && value.includes(',')) {
-          value = `"${value}"`;
-        }
+        if (typeof value === 'string' && value.includes(',')) value = `"${value}"`;
         return value;
       }).join(',')
     )
   ].join('\n');
-  
+
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = `reporte_${currentReportType}_${new Date().toISOString().split('T')[0]}.csv`;
   link.click();
-  
   showToast('Reporte exportado correctamente');
 };
 
-// ===== Search =====
+// ===== Búsqueda global =====
 document.getElementById('global-search').addEventListener('input', (e) => {
-  const query = e.target.value.toLowerCase().trim();
-  
-  // Search productos
-  const productResults = query ? productos.filter(p => 
-    p.name.toLowerCase().includes(query) ||
-    p.code.toLowerCase().includes(query) ||
-    p.group.toLowerCase().includes(query)
+  const q = e.target.value.toLowerCase().trim();
+
+  const productResults = q ? producto.filter(p =>
+    String(p.nombre_producto).toLowerCase().includes(q) ||
+    String(p.codigo_producto).toLowerCase().includes(q) ||
+    nombreTipo(p.tipo_producto).toLowerCase().includes(q)
   ) : [];
-  
-  updateSearchproductos(productResults);
-  
-  // Search movements
-  const movementResults = query ? movements.filter(m =>
-    m.productName.toLowerCase().includes(query) ||
-    m.productCode?.toLowerCase().includes(query) ||
-    m.reason?.toLowerCase().includes(query)
+  updateSearchProductos(productResults);
+
+  const movementResults = q ? movimientos.filter(m =>
+    String(m.nombre_producto).toLowerCase().includes(q) ||
+    String(m.codigo_producto || '').toLowerCase().includes(q) ||
+    String(m.motivo || '').toLowerCase().includes(q)
   ) : [];
-  
   updateSearchMovements(movementResults);
 });
 
-function updateSearchproductos(results) {
-  document.getElementById('product-count').textContent = `${results.length} resultado${results.length !== 1 ? 's' : ''}`;
-  
-  const tbody = document.getElementById('search-productos');
-  
+function updateSearchProductos(results) {
+  document.getElementById('product-count').textContent =
+    `${results.length} resultado${results.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('search-products');
+
   if (results.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No se encontraron productos</td></tr>';
     return;
   }
-  
+
   tbody.innerHTML = results.map(p => `
     <tr>
-      <td>${p.code}</td>
-      <td>${p.name}</td>
-      <td>${capitalizeFirst(p.group)}</td>
-      <td>${p.stock}</td>
-      <td>${formatCurrency(p.price)}</td>
-    </tr>
-  `).join('');
+      <td>${p.codigo_producto}</td>
+      <td>${p.nombre_producto}</td>
+      <td>${nombreTipo(p.tipo_producto)}</td>
+      <td>${p.stock_producto}</td>
+      <td>${formatCurrency(p.precio_unitario)}</td>
+    </tr>`).join('');
 }
 
 function updateSearchMovements(results) {
-  document.getElementById('movement-count').textContent = `${results.length} resultado${results.length !== 1 ? 's' : ''}`;
-  
+  document.getElementById('movement-count').textContent =
+    `${results.length} resultado${results.length !== 1 ? 's' : ''}`;
   const tbody = document.getElementById('search-movements');
-  
+
   if (results.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No se encontraron movimientos</td></tr>';
     return;
   }
-  
+
   tbody.innerHTML = results.map(m => {
-    const badgeClass = m.type === 'entrada' ? 'badge-success' : m.type === 'salida' ? 'badge-danger' : 'badge-blue';
+    const badgeClass = m.tipo_movimiento === 'entrada' ? 'badge-success'
+      : m.tipo_movimiento === 'salida' ? 'badge-danger' : 'badge-blue';
     return `
       <tr>
-        <td>${formatDate(m.createdAt)}</td>
-        <td><span class="badge ${badgeClass}">${capitalizeFirst(m.type)}</span></td>
-        <td>${m.productName}</td>
-        <td>${m.quantity}</td>
-        <td>${m.reason}</td>
-      </tr>
-    `;
+        <td>${formatDate(m.fecha_creacion)}</td>
+        <td><span class="badge ${badgeClass}">${capitalizeFirst(m.tipo_movimiento)}</span></td>
+        <td>${m.nombre_producto}</td>
+        <td>${m.cantidad}</td>
+        <td>${m.motivo}</td>
+      </tr>`;
   }).join('');
 }
 
-// ===== Initialize =====
-if (db) {
+// ===== Inicialización =====
+async function init() {
+  if (!db) return;
+
+  // 1) Cargar catálogos (selects) y armar los mapas código->nombre
+  await Promise.all([
+    cargarUnidadesMedida(),
+    cargarTipoProducto(),
+    cargarAlmacenes(),
+    cargarMotivos()
+  ]);
+
+  // 2) Activar escucha en tiempo real (ya con los mapas listos)
   setupRealtimeListeners();
+
+  // 3) Fechas por defecto en reportes
+  const today = new Date().toISOString().split('T')[0];
+  const lastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  document.getElementById('report-date-from').value = lastMonth;
+  document.getElementById('report-date-to').value = today;
 }
 
-// Set default dates for reports
-const today = new Date().toISOString().split('T')[0];
-const lastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-document.getElementById('report-date-from').value = lastMonth;
-document.getElementById('report-date-to').value = today;
+init();

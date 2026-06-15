@@ -216,19 +216,12 @@
                 <input type="text" id="nombre-producto" required placeholder="Nombre del producto" class="uppercase-input">
               </div>
               
-             <div class="form-group">
-              <label for="unidad-producto">Unidad de Medida *</label>
-              <select id="unidad-producto" required>
-                <option value="">Seleccionar...</option>
-              </select>
-            </div>
+              <div class="form-group" id="campo-unidad-medida"></div>
               
-              <div class="form-group">
-                <label for="tipo-producto">Tipo *</label>
-                <select id="tipo-producto" required>
-                  <option value="">Seleccionar...</option>
-                </select>
-              </div>
+              <div class="form-group" id="campo-tipo-producto"></div>
+
+              <div class="form-group" id="campo-almacen"></div>
+
 
               <div class="form-group">
                 <label for="stock-producto">Stock Inicial *</label>
@@ -245,12 +238,7 @@
                 <input type="number" id="precio-producto" placeholder="0" required>
               </div>
               
-              <div class="form-group">
-                <label for="almacen-producto">Almacén *</label>
-                <select id="almacen-producto" required>
-                  <option value="">Seleccionar...</option>
-                </select>
-              </div>
+
             </div>
             
             <div class="form-actions">
@@ -301,21 +289,7 @@
                     <option value="2">Bodega</option>
                   </select>
                 </div>
-                <div class="form-group">
-                  <label for="entry-reason">Motivo *</label>
-                  <select id="entry-reason" required>
-                    <option value="">Seleccionar motivo...</option>
-                    <option value="COMPRA">Compra</option>
-                    <option value="DEVOLUCION CLIENTE">Devolucion de Cliente</option>
-                    <option value="DEVOLUCION PROVEEDOR">Devolucion a Proveedor</option>
-                    <option value="AJUSTE INVENTARIO">Ajuste de Inventario</option>
-                    <option value="PRODUCCION">Produccion</option>
-                    <option value="DONACION RECIBIDA">Donacion Recibida</option>
-                    <option value="TRANSFERENCIA ENTRADA">Transferencia Entrada</option>
-                    <option value="INVENTARIO INICIAL">Inventario Inicial</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
+                <div id="campo-motivo"></div>
               </div>
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Registrar Entrada</button>
@@ -487,7 +461,6 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <td style="display:none;">${p.id}</td>
                     <th>Código</th>
                     <th>Producto</th>
                     <th>Tipo</th>
