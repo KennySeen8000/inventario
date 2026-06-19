@@ -87,6 +87,19 @@ function formatNumber(value) {
   }).format(n);
 }
 
+// Columnas que se muestran como moneda o como numero en los reportes
+const COLUMNAS_MONEDA = new Set(['Precio', 'Valor Total', 'Precio Unitario', 'Costo', 'Debe', 'Haber', 'Saldo Total']);
+const COLUMNAS_NUMERO = new Set(['Stock', 'Cantidad', 'Entrada', 'Salida', 'Saldo', 'Stock Actual', 'Stock Minimo', 'Diferencia']);
+
+function formatCell(header, value) {
+  if (COLUMNAS_MONEDA.has(header)) return formatCurrency(value);
+  if (COLUMNAS_NUMERO.has(header)) {
+    if ((header === 'Entrada' || header === 'Salida') && (Number(value) || 0) === 0) return '-';
+    return formatNumber(value);
+  }
+  return (value === null || value === undefined || value === '') ? '-' : value;
+}
+
 function formatDate(timestamp) {
   if (!timestamp) return '-';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -118,6 +131,45 @@ const nombreUnidad  = (c) => mapaUnidades[String(c)]  || (c ?? '-');
 const nombreTipo    = (c) => mapaTipos[String(c)]     || (c ?? '-');
 const nombreAlmacen = (c) => mapaAlmacenes[String(c)] || (c ?? '-');
 
+// ===== Formato RUT chileno =====
+// Deja solo digitos y K (en mayuscula)
+function limpiarRut(value) {
+  return String(value || '').toUpperCase().replace(/[^0-9K]/g, '');
+}
+
+// Formatea un texto como RUT chileno: 12.345.678-9
+function formatRut(value) {
+  const clean = limpiarRut(value);
+  if (!clean) return '';
+  const dv = clean.slice(-1);
+  let cuerpo = clean.slice(0, -1).replace(/K/g, ''); // K solo valido como digito verificador
+  if (cuerpo === '') return dv;
+  cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return cuerpo + '-' + dv;
+}
+
+// True si el texto parece un RUT (solo numeros, puntos, guion y una K final)
+function pareceRut(value) {
+  const v = String(value || '').trim();
+  if (!v) return false;
+  return /^[0-9.\-]*[kK]?$/.test(v) && /[0-9]/.test(v);
+}
+
+// Aplica formato de RUT mientras se escribe.
+// permitirNombre: si es true, no formatea cuando el texto parece un nombre (para campos de busqueda).
+function attachRutFormatter(inputId, { permitirNombre = false } = {}) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  el.addEventListener('input', function () {
+    if (permitirNombre && !pareceRut(this.value)) return;
+    const formatted = formatRut(this.value);
+    if (this.value !== formatted) {
+      this.value = formatted;
+      this.setSelectionRange(this.value.length, this.value.length);
+    }
+  });
+}
+
 // ===== Toast =====
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
@@ -141,8 +193,38 @@ navItems.forEach(item => {
     views.forEach(view => view.classList.remove('active'));
     document.getElementById(viewId + '-view').classList.add('active');
     document.getElementById('sidebar').classList.remove('open');
+    limpiarCampos();
   });
 });
+
+// Limpia los formularios y campos al cambiar de modulo
+function limpiarCampos() {
+  // Resetear todos los formularios
+  document.querySelectorAll('form').forEach(f => f.reset());
+
+  // Limpiar campos ocultos / autocompletado
+  ['entry-product-id', 'exit-product-id', 'transfer-product-id',
+   'entry-proveedor-id', 'editar-producto-id', 'editar-proveedor-id']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  const provNombre = document.getElementById('entry-proveedor-nombre');
+  if (provNombre) provNombre.value = '';
+  const provInfo = document.getElementById('entry-proveedor-info');
+  if (provInfo) provInfo.innerHTML = '';
+
+  // Cerrar listas de autocompletado abiertas
+  document.querySelectorAll('.autocomplete-list').forEach(l => l.classList.remove('show'));
+
+  // Limpiar busqueda global y sus resultados
+  const search = document.getElementById('global-search');
+  if (search) search.value = '';
+  if (typeof updateSearchProductos === 'function') updateSearchProductos([]);
+  if (typeof updateSearchMovements === 'function') updateSearchMovements([]);
+
+  // Ocultar el resultado de reportes
+  const reportResult = document.getElementById('report-result');
+  if (reportResult) reportResult.style.display = 'none';
+}
 
 document.getElementById('menu-toggle').addEventListener('click', () => {
   document.getElementById('sidebar').classList.toggle('open');
@@ -584,19 +666,136 @@ window.deleteProduct = async function (productId) {
 };
 
 // ===== Proveedores =====
+// Mantiene sincronizado el nombre del proveedor seleccionado en la entrada
 function llenarSelectProveedores() {
-  const sel = document.getElementById('entry-proveedor');
-  if (!sel) return;
-  const actual = sel.value;
-  sel.innerHTML = '<option value="">Seleccionar proveedor...</option>';
-  proveedores.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.id;
-    opt.textContent = p.nombre_proveedor + (p.rut_proveedor ? ` (${p.rut_proveedor})` : '');
-    sel.appendChild(opt);
-  });
-  sel.value = actual;
+  const hidden = document.getElementById('entry-proveedor-id');
+  const nombreEl = document.getElementById('entry-proveedor-nombre');
+  if (!hidden || !nombreEl || !hidden.value) return;
+  const p = proveedores.find(x => x.id === hidden.value);
+  if (p) nombreEl.value = p.nombre_proveedor || '';
 }
+
+// Autocompletado de proveedor por RUT / nombre en el formulario de entrada
+function setupProveedorAutocomplete() {
+  const input = document.getElementById('entry-proveedor-rut');
+  const list = document.getElementById('entry-proveedor-list');
+  const hidden = document.getElementById('entry-proveedor-id');
+  const nombreEl = document.getElementById('entry-proveedor-nombre');
+  const infoEl = document.getElementById('entry-proveedor-info');
+  if (!input || !list) return;
+
+  const limpiarSeleccion = () => {
+    hidden.value = '';
+    if (nombreEl) nombreEl.value = '';
+  };
+
+  const mostrarRegistrar = (rut) => {
+    infoEl.innerHTML =
+      'Proveedor no encontrado. <a href="#" id="link-registrar-proveedor">Registrar nuevo proveedor</a>';
+    const link = document.getElementById('link-registrar-proveedor');
+    if (link) link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      openQuickSupplierModal(rut);
+    });
+  };
+
+  input.addEventListener('input', function () {
+    const value = this.value.toUpperCase().trim();
+    limpiarSeleccion();
+    infoEl.innerHTML = '';
+
+    if (value.length < 1) { list.classList.remove('show'); return; }
+
+    const valueClean = limpiarRut(value);
+    const matches = proveedores.filter(p => {
+      const rutClean = limpiarRut(p.rut_proveedor);
+      return String(p.rut_proveedor || '').toUpperCase().includes(value) ||
+             (valueClean && rutClean.includes(valueClean)) ||
+             String(p.nombre_proveedor || '').toUpperCase().includes(value);
+    }).slice(0, 8);
+
+    if (matches.length === 0) {
+      list.classList.remove('show');
+      mostrarRegistrar(this.value.trim());
+      return;
+    }
+
+    list.innerHTML = matches.map(p => {
+      const rut = String(p.rut_proveedor || '').replace(/"/g, '&quot;');
+      const nom = String(p.nombre_proveedor || '').replace(/"/g, '&quot;');
+      return `
+        <div class="autocomplete-item" data-id="${p.id}" data-rut="${rut}" data-name="${nom}">
+          <span class="product-code">${p.rut_proveedor || 'SIN RUT'}</span>
+          <span class="product-name">- ${p.nombre_proveedor || ''}</span>
+        </div>`;
+    }).join('');
+    list.classList.add('show');
+
+    list.querySelectorAll('.autocomplete-item').forEach(item => {
+      item.addEventListener('click', function () {
+        input.value = this.dataset.rut || this.dataset.name;
+        hidden.value = this.dataset.id;
+        if (nombreEl) nombreEl.value = this.dataset.name;
+        infoEl.innerHTML = '';
+        list.classList.remove('show');
+      });
+    });
+  });
+
+  input.addEventListener('blur', function () {
+    setTimeout(() => list.classList.remove('show'), 200);
+  });
+}
+
+// ===== Modal rapido de proveedor (desde Movimientos) =====
+window.openQuickSupplierModal = function (rut = '') {
+  const form = document.getElementById('quick-supplier-form');
+  if (form) form.reset();
+  document.getElementById('quick-supplier-rut').value = rut || '';
+  document.getElementById('quick-supplier-modal').classList.add('active');
+};
+
+window.closeQuickSupplierModal = function () {
+  document.getElementById('quick-supplier-modal').classList.remove('active');
+};
+
+document.getElementById('quick-supplier-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById('quick-supplier-name').value.trim();
+  if (!nombre) {
+    showToast('El nombre del proveedor es obligatorio', 'error');
+    return;
+  }
+  try {
+    const snapshot = await getDocs(collection(db, 'proveedores'));
+    const nuevoId = snapshot.size.toString();
+    const nuevo = {
+      codigo_proveedor: nuevoId,
+      rut_proveedor: document.getElementById('quick-supplier-rut').value.trim(),
+      nombre_proveedor: nombre,
+      giro_proveedor: document.getElementById('quick-supplier-giro').value.trim(),
+      contacto_proveedor: document.getElementById('quick-supplier-contact').value.trim(),
+      telefono_proveedor: document.getElementById('quick-supplier-phone').value.trim(),
+      email_proveedor: document.getElementById('quick-supplier-email').value.trim(),
+      direccion_proveedor: document.getElementById('quick-supplier-address').value.trim(),
+      fecha_creacion: Timestamp.now()
+    };
+    await setDoc(doc(db, 'proveedores', nuevoId), nuevo);
+
+    // Seleccionar automaticamente el proveedor recien creado en la entrada
+    document.getElementById('entry-proveedor-id').value = nuevoId;
+    document.getElementById('entry-proveedor-rut').value = nuevo.rut_proveedor || nuevo.nombre_proveedor;
+    document.getElementById('entry-proveedor-nombre').value = nuevo.nombre_proveedor;
+    const infoEl = document.getElementById('entry-proveedor-info');
+    if (infoEl) infoEl.innerHTML = '';
+
+    showToast('Proveedor registrado y seleccionado');
+    closeQuickSupplierModal();
+  } catch (error) {
+    console.error('Error al registrar proveedor:', error);
+    showToast('Error al registrar el proveedor', 'error');
+  }
+});
 
 function updateSuppliersTable() {
   const tbody = document.getElementById('suppliers-table');
@@ -729,7 +928,28 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
   }
 
   // Datos del documento / proveedor
-  const provId = document.getElementById('entry-proveedor').value;
+  // Validar proveedor: si se escribio algo, debe estar registrado
+  let provId = document.getElementById('entry-proveedor-id').value;
+  const provText = document.getElementById('entry-proveedor-rut').value.trim();
+
+  if (!provId && provText) {
+    // Intentar resolver por RUT o nombre exacto (por si no se hizo clic en la lista)
+    const provClean = limpiarRut(provText);
+    const match = proveedores.find(p =>
+      (provClean && limpiarRut(p.rut_proveedor) === provClean) ||
+      String(p.nombre_proveedor || '').toUpperCase() === provText.toUpperCase()
+    );
+    if (match) {
+      provId = match.id;
+      document.getElementById('entry-proveedor-id').value = match.id;
+      document.getElementById('entry-proveedor-nombre').value = match.nombre_proveedor || '';
+    } else {
+      showToast('El proveedor no esta registrado. Registrelo para continuar.', 'error');
+      openQuickSupplierModal(provText);
+      return;
+    }
+  }
+
   const prov = proveedores.find(p => p.id === provId);
   const fechaDocVal = document.getElementById('entry-doc-date').value;
 
@@ -743,7 +963,9 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
       almacen,
       motivo,
       proveedor_id: provId || '',
+      proveedor_rut: prov ? (prov.rut_proveedor || '') : '',
       empresa: prov ? prov.nombre_proveedor : '',
+      precio_unitario: Number(prod.precio_unitario) || 0,
       tipo_documento: document.getElementById('entry-doc-type').value || '',
       numero_documento: document.getElementById('entry-doc-number').value.trim(),
       fecha_documento: fechaDocVal ? Timestamp.fromDate(new Date(fechaDocVal + 'T00:00:00')) : null,
@@ -800,6 +1022,7 @@ document.getElementById('exit-form').addEventListener('submit', async (e) => {
       almacen,
       motivo,
       empresa: document.getElementById('exit-empresa').value.trim(),
+      precio_unitario: Number(prod.precio_unitario) || 0,
       tipo_documento: document.getElementById('exit-doc-type').value || '',
       numero_documento: document.getElementById('exit-doc-number').value.trim(),
       fecha_documento: fechaDocVal ? Timestamp.fromDate(new Date(fechaDocVal + 'T00:00:00')) : null,
@@ -854,6 +1077,7 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
       cantidad,
       almacen: `${fromTxt} → ${toTxt}`,
       motivo: 'TRANSFERENCIA ENTRE ALMACENES',
+      precio_unitario: Number(prod.precio_unitario) || 0,
       fecha_creacion: Timestamp.now()
     });
 
@@ -990,6 +1214,14 @@ setupAutocomplete('entry-product', 'entry-product-list', 'entry-product-id');
 setupAutocomplete('exit-product', 'exit-product-list', 'exit-product-id');
 setupAutocomplete('transfer-product', 'transfer-product-list', 'transfer-product-id');
 
+// Formato de RUT chileno en los campos de proveedor
+attachRutFormatter('entry-proveedor-rut', { permitirNombre: true });
+attachRutFormatter('supplier-rut');
+attachRutFormatter('editar-supplier-rut');
+attachRutFormatter('quick-supplier-rut');
+
+setupProveedorAutocomplete();
+
 // ===== Reportes =====
 let currentReportData = [];
 let currentReportType = '';
@@ -1066,6 +1298,7 @@ window.generateLowStockReport = function () {
 window.generateDocumentationReport = function () {
   const from = document.getElementById('doc-date-from').value;
   const to = document.getElementById('doc-date-to').value;
+  const tipoFiltro = (document.getElementById('doc-type-filter') || {}).value || 'all';
 
   currentReportType = 'documentacion';
 
@@ -1074,8 +1307,22 @@ window.generateDocumentationReport = function () {
     return f?.toDate ? f.toDate() : new Date(f);
   };
 
-  // Solo movimientos que tienen documento asociado
-  let filtered = movimientos.filter(m => m.numero_documento || m.tipo_documento);
+  // Precio: usa el guardado en el movimiento; si no, el actual del producto
+  const precioDe = (m) => {
+    if (m.precio_unitario != null && m.precio_unitario !== '') return Number(m.precio_unitario) || 0;
+    const p = producto.find(x => x.id === m.producto_id) ||
+              producto.find(x => String(x.codigo_producto) === String(m.codigo_producto));
+    return p ? (Number(p.precio_unitario) || 0) : 0;
+  };
+
+  // Solo entradas/salidas con documento (se excluyen las transferencias)
+  let filtered = movimientos.filter(m =>
+    (m.numero_documento || m.tipo_documento) && m.tipo_movimiento !== 'transferencia'
+  );
+
+  if (tipoFiltro !== 'all') {
+    filtered = filtered.filter(m => m.tipo_movimiento === tipoFiltro);
+  }
 
   if (from) {
     const fromDate = new Date(from);
@@ -1087,21 +1334,45 @@ window.generateDocumentationReport = function () {
     filtered = filtered.filter(m => fechaDe(m) <= toDate);
   }
 
-  // Ordenar por fecha de documento descendente
-  filtered.sort((a, b) => fechaDe(b) - fechaDe(a));
+  // Orden cronologico ascendente para calcular saldos acumulados
+  filtered.sort((a, b) => fechaDe(a) - fechaDe(b));
 
-  currentReportData = filtered.map(m => ({
-    Fecha: formatDate(m.fecha_documento || m.fecha_creacion),
-    Movimiento: capitalizeFirst(m.tipo_movimiento),
-    'Tipo Doc': m.tipo_documento || '-',
-    'N° Documento': m.numero_documento || '-',
-    Empresa: m.empresa || '-',
-    Producto: m.nombre_producto,
-    Codigo: m.codigo_producto,
-    Cantidad: m.cantidad,
-    Almacen: m.almacen
-  }));
-  displayReport('Reporte de Documentación Ingresada', currentReportData);
+  let saldoCant = 0;
+  let saldoTotal = 0;
+
+  currentReportData = filtered.map(m => {
+    const esEntrada = m.tipo_movimiento === 'entrada';
+    const cant = Number(m.cantidad) || 0;
+    const precio = precioDe(m);
+    const entrada = esEntrada ? cant : 0;
+    const salida = esEntrada ? 0 : cant;
+    const costo = cant * precio;
+    const debe = esEntrada ? costo : 0;
+    const haber = esEntrada ? 0 : costo;
+
+    saldoCant += entrada - salida;
+    saldoTotal += debe - haber;
+
+    return {
+      Fecha: formatDate(m.fecha_documento || m.fecha_creacion),
+      Bodega: m.almacen || '-',
+      'Tipo Documento': m.tipo_documento || '-',
+      'N° Documento': m.numero_documento || '-',
+      Entrada: entrada,
+      Salida: salida,
+      Saldo: saldoCant,
+      'Precio Unitario': precio,
+      Costo: costo,
+      Debe: debe,
+      Haber: haber,
+      'Saldo Total': saldoTotal
+    };
+  });
+
+  let titulo = 'Reporte de Documentacion - Entradas y Salidas';
+  if (tipoFiltro === 'entrada') titulo = 'Reporte de Documentacion - Entradas';
+  if (tipoFiltro === 'salida') titulo = 'Reporte de Documentacion - Salidas';
+  displayReport(titulo, currentReportData);
 };
 
 function displayReport(title, data) {
@@ -1120,11 +1391,7 @@ function displayReport(title, data) {
   const headers = Object.keys(data[0]);
   thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
   tbody.innerHTML = data.map(row =>
-    `<tr>${headers.map(h => {
-      let value = row[h];
-      if (h === 'Precio' || h === 'Valor Total') value = formatCurrency(value);
-      return `<td>${value}</td>`;
-    }).join('')}</tr>`
+    `<tr>${headers.map(h => `<td>${formatCell(h, row[h])}</td>`).join('')}</tr>`
   ).join('');
 
   resultEl.style.display = 'block';
@@ -1155,6 +1422,62 @@ window.exportReportCSV = function () {
   showToast('Reporte exportado correctamente');
 };
 
+window.exportReportExcel = function () {
+  if (currentReportData.length === 0) {
+    showToast('No hay datos para exportar', 'error');
+    return;
+  }
+  if (typeof XLSX === 'undefined') {
+    showToast('No se pudo cargar el componente de Excel', 'error');
+    return;
+  }
+  const ws = XLSX.utils.json_to_sheet(currentReportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+  XLSX.writeFile(wb, `reporte_${currentReportType}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  showToast('Reporte Excel generado');
+};
+
+window.exportReportPDF = function () {
+  if (currentReportData.length === 0) {
+    showToast('No hay datos para exportar', 'error');
+    return;
+  }
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    showToast('No se pudo cargar el componente de PDF', 'error');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const headers = Object.keys(currentReportData[0]);
+  const muchasCols = headers.length > 7;
+  const docPdf = new jsPDF({ orientation: muchasCols ? 'landscape' : 'portrait' });
+  const title = document.getElementById('report-title').textContent;
+
+  const body = currentReportData.map(row => headers.map(h => formatCell(h, row[h])));
+
+  const fechaImpresion = new Intl.DateTimeFormat('es-CL', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  }).format(new Date());
+
+  docPdf.setFontSize(13);
+  docPdf.text(title, 14, 15);
+  docPdf.setFontSize(9);
+  docPdf.setTextColor(120);
+  docPdf.text(`StockControl - Generado el ${fechaImpresion} - ${currentReportData.length} registro(s)`, 14, 21);
+
+  docPdf.autoTable({
+    head: [headers],
+    body,
+    startY: 26,
+    styles: { fontSize: muchasCols ? 7 : 9, cellPadding: 2 },
+    headStyles: { fillColor: [79, 70, 229] },
+    alternateRowStyles: { fillColor: [248, 250, 252] }
+  });
+
+  docPdf.save(`reporte_${currentReportType}_${new Date().toISOString().split('T')[0]}.pdf`);
+  showToast('Reporte PDF generado');
+};
+
 window.printReport = function () {
   if (currentReportData.length === 0) {
     showToast('No hay datos para imprimir', 'error');
@@ -1165,11 +1488,7 @@ window.printReport = function () {
   const headers = Object.keys(currentReportData[0]);
 
   const filasHtml = currentReportData.map(row =>
-    `<tr>${headers.map(h => {
-      let value = row[h];
-      if (h === 'Precio' || h === 'Valor Total') value = formatCurrency(value);
-      return `<td>${value ?? '-'}</td>`;
-    }).join('')}</tr>`
+    `<tr>${headers.map(h => `<td>${formatCell(h, row[h])}</td>`).join('')}</tr>`
   ).join('');
 
   const fechaImpresion = new Intl.DateTimeFormat('es-CL', {

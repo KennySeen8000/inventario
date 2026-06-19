@@ -299,10 +299,17 @@
                 </div>
                 <div id="campo-motivo"></div>
                 <div class="form-group">
-                  <label for="entry-proveedor">Proveedor / Empresa</label>
-                  <select id="entry-proveedor">
-                    <option value="">Seleccionar proveedor...</option>
-                  </select>
+                  <label for="entry-proveedor-rut">Proveedor (RUT)</label>
+                  <div class="autocomplete-wrapper">
+                    <input type="text" id="entry-proveedor-rut" placeholder="Escriba el RUT o nombre..." class="uppercase-input" autocomplete="off">
+                    <div class="autocomplete-list" id="entry-proveedor-list"></div>
+                  </div>
+                  <input type="hidden" id="entry-proveedor-id">
+                  <small class="field-hint" id="entry-proveedor-info"></small>
+                </div>
+                <div class="form-group">
+                  <label for="entry-proveedor-nombre">Razon Social</label>
+                  <input type="text" id="entry-proveedor-nombre" placeholder="Se completa automaticamente" readonly>
                 </div>
                 <div class="form-group">
                   <label for="entry-doc-type">Tipo de Documento</label>
@@ -673,6 +680,14 @@
             </div>
             <h3>Documentación Ingresada</h3>
             <p>Facturas, boletas y guías de entradas y salidas</p>
+            <div class="form-group" style="margin-bottom: 1rem; text-align: left;">
+              <label for="doc-type-filter">Tipo de movimiento</label>
+              <select id="doc-type-filter">
+                <option value="all">Entradas y Salidas</option>
+                <option value="entrada">Solo Entradas</option>
+                <option value="salida">Solo Salidas</option>
+              </select>
+            </div>
             <div class="date-range">
               <input type="date" id="doc-date-from">
               <span>a</span>
@@ -686,8 +701,10 @@
           <div class="card-header">
             <h3 id="report-title">Resultado del Reporte</h3>
             <div class="filter-group">
+              <button class="btn btn-secondary" onclick="exportReportExcel()">Excel</button>
+              <button class="btn btn-secondary" onclick="exportReportPDF()">PDF</button>
               <button class="btn btn-secondary" onclick="printReport()">Imprimir</button>
-              <button class="btn btn-secondary" onclick="exportReportCSV()">Exportar CSV</button>
+              <button class="btn btn-secondary" onclick="exportReportCSV()">CSV</button>
             </div>
           </div>
           <div class="card-content">
@@ -892,10 +909,61 @@
     </div>
   </div>
 
+  <!-- Quick Supplier Modal (desde Movimientos) -->
+  <div class="modal-overlay" id="quick-supplier-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Registrar Proveedor</h3>
+        <button class="modal-close" onclick="closeQuickSupplierModal()">&times;</button>
+      </div>
+      <form id="quick-supplier-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="quick-supplier-rut">RUT</label>
+            <input type="text" id="quick-supplier-rut" class="uppercase-input" placeholder="Ej: 76.123.456-7" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="quick-supplier-name">Razón Social / Nombre *</label>
+            <input type="text" id="quick-supplier-name" required class="uppercase-input" placeholder="Nombre del proveedor" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="quick-supplier-giro">Giro</label>
+            <input type="text" id="quick-supplier-giro" placeholder="Giro o rubro" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="quick-supplier-contact">Contacto</label>
+            <input type="text" id="quick-supplier-contact" placeholder="Persona de contacto" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="quick-supplier-phone">Teléfono</label>
+            <input type="text" id="quick-supplier-phone" placeholder="Ej: +56 9 1234 5678" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="quick-supplier-email">Email</label>
+            <input type="email" id="quick-supplier-email" placeholder="correo@empresa.cl" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="quick-supplier-address">Dirección</label>
+            <input type="text" id="quick-supplier-address" placeholder="Dirección" autocomplete="off">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeQuickSupplierModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar y Seleccionar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast" id="toast">
     <span class="toast-message"></span>
   </div>
+
+  <!-- Librerias de exportacion (Excel / PDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <!-- Firebase SDK -->
   <script type="module" src="app.js"></script>
