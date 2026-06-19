@@ -30,6 +30,7 @@ const firebaseConfig = {
 let app, db;
 let producto = [];      // documentos de la colección "producto"
 let movimientos = [];   // documentos de la colección "movimientos"
+let proveedores = [];   // documentos de la colección "proveedores"
 
 // Mapas código -> nombre, para mostrar nombres en vez de códigos
 let mapaUnidades = {};
@@ -71,8 +72,19 @@ function updateConnectionStatus(status) {
 function formatCurrency(value) {
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
-    currency: 'CLP'
+    currency: 'CLP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(Number(value) || 0);
+}
+
+// Formatea cantidades/stock con hasta 2 decimales (sin decimales si es entero)
+function formatNumber(value) {
+  const n = Number(value) || 0;
+  return new Intl.NumberFormat('es-CL', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  }).format(n);
 }
 
 function formatDate(timestamp) {
@@ -306,6 +318,17 @@ function setupRealtimeListeners() {
   }, (error) => {
     console.error('Error en listener de movimientos:', error);
   });
+
+  // Proveedores
+  onSnapshot(collection(db, 'proveedores'), (snapshot) => {
+    proveedores = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    proveedores.sort((a, b) =>
+      String(a.nombre_proveedor || '').localeCompare(String(b.nombre_proveedor || '')));
+    updateSuppliersTable();
+    llenarSelectProveedores();
+  }, (error) => {
+    console.error('Error en listener de proveedores:', error);
+  });
 }
 
 // ===== Dashboard =====
@@ -353,7 +376,7 @@ function updateRecentMovements() {
       <div class="recent-item">
         <div class="recent-icon ${iconClass}">${icon}</div>
         <div class="recent-info">
-          <div class="recent-title">${m.nombre_producto} (${m.cantidad})</div>
+          <div class="recent-title">${m.nombre_producto} (${formatNumber(m.cantidad)})</div>
           <div class="recent-meta">${capitalizeFirst(m.tipo_movimiento)} - ${formatDate(m.fecha_creacion)}</div>
         </div>
       </div>`;
@@ -380,7 +403,7 @@ function updateStockAlerts() {
       </div>
       <div class="alert-info">
         <div class="alert-title">${p.nombre_producto}</div>
-        <div class="alert-meta">Stock: ${p.stock_producto} / Mín: ${p.stock_minimo}</div>
+        <div class="alert-meta">Stock: ${formatNumber(p.stock_producto)} / Mín: ${formatNumber(p.stock_minimo)}</div>
       </div>
       <span class="badge ${Number(p.stock_producto) === 0 ? 'badge-danger' : 'badge-warning'}">
         ${Number(p.stock_producto) === 0 ? 'Sin Stock' : 'Stock Bajo'}
@@ -412,8 +435,8 @@ document.getElementById('formulario-producto').addEventListener('submit', async 
       nombre_producto: document.getElementById('nombre-producto').value,
       unidad_producto: document.getElementById('unidad-producto').value,
       tipo_producto: document.getElementById('tipo-producto').value,
-      stock_producto: parseInt(document.getElementById('stock-producto').value) || 0,
-      stock_minimo: parseInt(document.getElementById('stock-min-producto').value) || 5,
+      stock_producto: parseFloat(document.getElementById('stock-producto').value) || 0,
+      stock_minimo: parseFloat(document.getElementById('stock-min-producto').value) || 5,
       precio_unitario: parseFloat(document.getElementById('precio-producto').value) || 0,
       almacen_producto: document.getElementById('almacen-producto').value,
       fecha_creacion: Timestamp.now()
@@ -481,7 +504,7 @@ function updateInventoryTable() {
         <td>${p.codigo_producto}</td>
         <td>${p.nombre_producto}</td>
         <td>${nombreTipo(p.tipo_producto)}</td>
-        <td>${stock}</td>
+        <td>${formatNumber(stock)}</td>
         <td>${nombreUnidad(p.unidad_producto)}</td>
         <td>${formatCurrency(precioSinIva)}</td>
         <td>${formatCurrency(precioConIva)}</td>
@@ -533,8 +556,8 @@ document.getElementById('edit-form').addEventListener('submit', async (e) => {
     nombre_producto: document.getElementById('editar-nombre-producto').value,
     unidad_producto: document.getElementById('editar-unidad-producto').value,
     tipo_producto: document.getElementById('editar-tipo-producto').value,
-    stock_producto: parseInt(document.getElementById('editar-stock-producto').value) || 0,
-    stock_minimo: parseInt(document.getElementById('editar-stock-minimo').value) || 5,
+    stock_producto: parseFloat(document.getElementById('editar-stock-producto').value) || 0,
+    stock_minimo: parseFloat(document.getElementById('editar-stock-minimo').value) || 5,
     precio_unitario: parseFloat(document.getElementById('editar-precio-unitario').value) || 0,
     almacen_producto: document.getElementById('editar-almacen-producto').value
   };
@@ -560,6 +583,130 @@ window.deleteProduct = async function (productId) {
   }
 };
 
+// ===== Proveedores =====
+function llenarSelectProveedores() {
+  const sel = document.getElementById('entry-proveedor');
+  if (!sel) return;
+  const actual = sel.value;
+  sel.innerHTML = '<option value="">Seleccionar proveedor...</option>';
+  proveedores.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.nombre_proveedor + (p.rut_proveedor ? ` (${p.rut_proveedor})` : '');
+    sel.appendChild(opt);
+  });
+  sel.value = actual;
+}
+
+function updateSuppliersTable() {
+  const tbody = document.getElementById('suppliers-table');
+  const countEl = document.getElementById('supplier-count');
+  if (!tbody) return;
+
+  if (countEl) {
+    countEl.textContent = `${proveedores.length} proveedor${proveedores.length !== 1 ? 'es' : ''}`;
+  }
+
+  if (proveedores.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No hay proveedores registrados</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = proveedores.map(p => `
+    <tr data-id="${p.id}">
+      <td>${p.rut_proveedor || '-'}</td>
+      <td>${p.nombre_proveedor || '-'}</td>
+      <td>${p.giro_proveedor || '-'}</td>
+      <td>${p.contacto_proveedor || '-'}</td>
+      <td>${p.telefono_proveedor || '-'}</td>
+      <td>${p.email_proveedor || '-'}</td>
+      <td class="actions">
+        <button class="btn-icon" onclick="openSupplierModal('${p.id}')" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="deleteSupplier('${p.id}')" title="Eliminar">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+// Alta de proveedor
+document.getElementById('supplier-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById('supplier-name').value.trim();
+  if (!nombre) {
+    showToast('El nombre del proveedor es obligatorio', 'error');
+    return;
+  }
+  try {
+    const snapshot = await getDocs(collection(db, 'proveedores'));
+    const nuevoId = snapshot.size.toString();
+    await setDoc(doc(db, 'proveedores', nuevoId), {
+      codigo_proveedor: nuevoId,
+      rut_proveedor: document.getElementById('supplier-rut').value.trim(),
+      nombre_proveedor: nombre,
+      giro_proveedor: document.getElementById('supplier-giro').value.trim(),
+      contacto_proveedor: document.getElementById('supplier-contact').value.trim(),
+      telefono_proveedor: document.getElementById('supplier-phone').value.trim(),
+      email_proveedor: document.getElementById('supplier-email').value.trim(),
+      direccion_proveedor: document.getElementById('supplier-address').value.trim(),
+      fecha_creacion: Timestamp.now()
+    });
+    showToast('Proveedor guardado correctamente');
+    document.getElementById('supplier-form').reset();
+  } catch (error) {
+    console.error('Error al guardar proveedor:', error);
+    showToast('Error al guardar el proveedor', 'error');
+  }
+});
+
+window.openSupplierModal = function (id) {
+  const p = proveedores.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('editar-proveedor-id').value = p.id;
+  document.getElementById('editar-supplier-rut').value = p.rut_proveedor || '';
+  document.getElementById('editar-supplier-name').value = p.nombre_proveedor || '';
+  document.getElementById('editar-supplier-giro').value = p.giro_proveedor || '';
+  document.getElementById('editar-supplier-contact').value = p.contacto_proveedor || '';
+  document.getElementById('editar-supplier-phone').value = p.telefono_proveedor || '';
+  document.getElementById('editar-supplier-email').value = p.email_proveedor || '';
+  document.getElementById('editar-supplier-address').value = p.direccion_proveedor || '';
+  document.getElementById('edit-supplier-modal').classList.add('active');
+};
+
+window.closeSupplierModal = function () {
+  document.getElementById('edit-supplier-modal').classList.remove('active');
+};
+
+document.getElementById('edit-supplier-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('editar-proveedor-id').value;
+  try {
+    await updateDoc(doc(db, 'proveedores', id), {
+      rut_proveedor: document.getElementById('editar-supplier-rut').value.trim(),
+      nombre_proveedor: document.getElementById('editar-supplier-name').value.trim(),
+      giro_proveedor: document.getElementById('editar-supplier-giro').value.trim(),
+      contacto_proveedor: document.getElementById('editar-supplier-contact').value.trim(),
+      telefono_proveedor: document.getElementById('editar-supplier-phone').value.trim(),
+      email_proveedor: document.getElementById('editar-supplier-email').value.trim(),
+      direccion_proveedor: document.getElementById('editar-supplier-address').value.trim()
+    });
+    showToast('Proveedor actualizado correctamente');
+    closeSupplierModal();
+  } catch (error) {
+    console.error('Error al actualizar proveedor:', error);
+    showToast('Error al actualizar el proveedor', 'error');
+  }
+});
+
+window.deleteSupplier = async function (id) {
+  if (!confirm('¿Está seguro de eliminar este proveedor?')) return;
+  try {
+    await deleteDoc(doc(db, 'proveedores', id));
+    showToast('Proveedor eliminado correctamente');
+  } catch (error) {
+    console.error('Error al eliminar proveedor:', error);
+    showToast('Error al eliminar el proveedor', 'error');
+  }
+};
+
 // ===== Movimientos =====
 // Entrada
 document.getElementById('entry-form').addEventListener('submit', async (e) => {
@@ -572,7 +719,7 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
     return;
   }
 
-  const cantidad = parseInt(document.getElementById('entry-quantity').value);
+  const cantidad = parseFloat(document.getElementById('entry-quantity').value);
   const almacen = textoSeleccionado('entry-warehouse');
   const motivo = textoSeleccionado('motivo-movimiento');
 
@@ -580,6 +727,11 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
     showToast('Debe seleccionar un motivo', 'error');
     return;
   }
+
+  // Datos del documento / proveedor
+  const provId = document.getElementById('entry-proveedor').value;
+  const prov = proveedores.find(p => p.id === provId);
+  const fechaDocVal = document.getElementById('entry-doc-date').value;
 
   try {
     await addDoc(collection(db, 'movimientos'), {
@@ -590,6 +742,11 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
       cantidad,
       almacen,
       motivo,
+      proveedor_id: provId || '',
+      empresa: prov ? prov.nombre_proveedor : '',
+      tipo_documento: document.getElementById('entry-doc-type').value || '',
+      numero_documento: document.getElementById('entry-doc-number').value.trim(),
+      fecha_documento: fechaDocVal ? Timestamp.fromDate(new Date(fechaDocVal + 'T00:00:00')) : null,
       fecha_creacion: Timestamp.now()
     });
 
@@ -617,7 +774,7 @@ document.getElementById('exit-form').addEventListener('submit', async (e) => {
     return;
   }
 
-  const cantidad = parseInt(document.getElementById('exit-quantity').value);
+  const cantidad = parseFloat(document.getElementById('exit-quantity').value);
   if (cantidad > (Number(prod.stock_producto) || 0)) {
     showToast('No hay suficiente stock disponible', 'error');
     return;
@@ -631,6 +788,8 @@ document.getElementById('exit-form').addEventListener('submit', async (e) => {
     return;
   }
 
+  const fechaDocVal = document.getElementById('exit-doc-date').value;
+
   try {
     await addDoc(collection(db, 'movimientos'), {
       tipo_movimiento: 'salida',
@@ -640,6 +799,10 @@ document.getElementById('exit-form').addEventListener('submit', async (e) => {
       cantidad,
       almacen,
       motivo,
+      empresa: document.getElementById('exit-empresa').value.trim(),
+      tipo_documento: document.getElementById('exit-doc-type').value || '',
+      numero_documento: document.getElementById('exit-doc-number').value.trim(),
+      fecha_documento: fechaDocVal ? Timestamp.fromDate(new Date(fechaDocVal + 'T00:00:00')) : null,
       fecha_creacion: Timestamp.now()
     });
 
@@ -667,7 +830,7 @@ document.getElementById('transfer-form').addEventListener('submit', async (e) =>
     return;
   }
 
-  const cantidad = parseInt(document.getElementById('transfer-quantity').value);
+  const cantidad = parseFloat(document.getElementById('transfer-quantity').value);
   const fromVal = document.getElementById('transfer-from').value;
   const toVal = document.getElementById('transfer-to').value;
   const fromTxt = textoSeleccionado('transfer-from');
@@ -714,20 +877,25 @@ function updateMovementsTable() {
   }
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay movimientos que mostrar</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay movimientos que mostrar</td></tr>';
     return;
   }
 
   tbody.innerHTML = filtered.map(m => {
     const badgeClass = m.tipo_movimiento === 'entrada' ? 'badge-success'
       : m.tipo_movimiento === 'salida' ? 'badge-danger' : 'badge-blue';
+    const doc = m.numero_documento
+      ? `${m.tipo_documento || 'DOC'} ${m.numero_documento}`
+      : (m.tipo_documento || '-');
     return `
       <tr>
         <td>${formatDate(m.fecha_creacion)}</td>
         <td><span class="badge ${badgeClass}">${capitalizeFirst(m.tipo_movimiento)}</span></td>
         <td>${m.nombre_producto}</td>
-        <td>${m.cantidad}</td>
+        <td>${formatNumber(m.cantidad)}</td>
         <td>${m.almacen}</td>
+        <td>${m.empresa || '-'}</td>
+        <td>${doc}</td>
         <td>${m.motivo}</td>
       </tr>`;
   }).join('');
@@ -771,7 +939,7 @@ function setupAutocomplete(inputId, listId, hiddenId) {
       <div class="autocomplete-item" data-id="${p.id}" data-code="${p.codigo_producto}" data-name="${p.nombre_producto}" data-index="${idx}">
         <span class="product-code">${p.codigo_producto}</span>
         <span class="product-name">- ${p.nombre_producto}</span>
-        <span class="product-stock">Stock: ${p.stock_producto} ${nombreUnidad(p.unidad_producto)}</span>
+        <span class="product-stock">Stock: ${formatNumber(p.stock_producto)} ${nombreUnidad(p.unidad_producto)}</span>
       </div>`).join('');
 
     list.classList.add('show');
@@ -895,6 +1063,47 @@ window.generateLowStockReport = function () {
   displayReport('Reporte de Productos con Stock Bajo', currentReportData);
 };
 
+window.generateDocumentationReport = function () {
+  const from = document.getElementById('doc-date-from').value;
+  const to = document.getElementById('doc-date-to').value;
+
+  currentReportType = 'documentacion';
+
+  const fechaDe = (m) => {
+    const f = m.fecha_documento || m.fecha_creacion;
+    return f?.toDate ? f.toDate() : new Date(f);
+  };
+
+  // Solo movimientos que tienen documento asociado
+  let filtered = movimientos.filter(m => m.numero_documento || m.tipo_documento);
+
+  if (from) {
+    const fromDate = new Date(from);
+    filtered = filtered.filter(m => fechaDe(m) >= fromDate);
+  }
+  if (to) {
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59);
+    filtered = filtered.filter(m => fechaDe(m) <= toDate);
+  }
+
+  // Ordenar por fecha de documento descendente
+  filtered.sort((a, b) => fechaDe(b) - fechaDe(a));
+
+  currentReportData = filtered.map(m => ({
+    Fecha: formatDate(m.fecha_documento || m.fecha_creacion),
+    Movimiento: capitalizeFirst(m.tipo_movimiento),
+    'Tipo Doc': m.tipo_documento || '-',
+    'N° Documento': m.numero_documento || '-',
+    Empresa: m.empresa || '-',
+    Producto: m.nombre_producto,
+    Codigo: m.codigo_producto,
+    Cantidad: m.cantidad,
+    Almacen: m.almacen
+  }));
+  displayReport('Reporte de Documentación Ingresada', currentReportData);
+};
+
 function displayReport(title, data) {
   document.getElementById('report-title').textContent = title;
   const resultEl = document.getElementById('report-result');
@@ -946,6 +1155,66 @@ window.exportReportCSV = function () {
   showToast('Reporte exportado correctamente');
 };
 
+window.printReport = function () {
+  if (currentReportData.length === 0) {
+    showToast('No hay datos para imprimir', 'error');
+    return;
+  }
+
+  const title = document.getElementById('report-title').textContent;
+  const headers = Object.keys(currentReportData[0]);
+
+  const filasHtml = currentReportData.map(row =>
+    `<tr>${headers.map(h => {
+      let value = row[h];
+      if (h === 'Precio' || h === 'Valor Total') value = formatCurrency(value);
+      return `<td>${value ?? '-'}</td>`;
+    }).join('')}</tr>`
+  ).join('');
+
+  const fechaImpresion = new Intl.DateTimeFormat('es-CL', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  }).format(new Date());
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    showToast('Habilite las ventanas emergentes para imprimir', 'error');
+    return;
+  }
+
+  win.document.write(`
+    <html>
+    <head>
+      <title>${title}</title>
+      <meta charset="utf-8">
+      <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial, Helvetica, sans-serif; color: #1e293b; margin: 24px; }
+        h1 { font-size: 18px; margin: 0 0 4px; }
+        .meta { font-size: 12px; color: #64748b; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
+        th { background: #f1f5f9; text-transform: uppercase; font-size: 11px; letter-spacing: .03em; }
+        tr:nth-child(even) td { background: #f8fafc; }
+        .footer { margin-top: 16px; font-size: 11px; color: #94a3b8; text-align: right; }
+        @media print { body { margin: 12mm; } }
+      </style>
+    </head>
+    <body>
+      <h1>${title}</h1>
+      <div class="meta">StockControl &middot; Generado el ${fechaImpresion} &middot; ${currentReportData.length} registro(s)</div>
+      <table>
+        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>${filasHtml}</tbody>
+      </table>
+      <div class="footer">Documento generado por StockControl</div>
+      <script>window.onload = function(){ window.print(); }<\/script>
+    </body>
+    </html>
+  `);
+  win.document.close();
+};
+
 // ===== Búsqueda global =====
 document.getElementById('global-search').addEventListener('input', (e) => {
   const q = e.target.value.toLowerCase().trim();
@@ -980,7 +1249,7 @@ function updateSearchProductos(results) {
       <td>${p.codigo_producto}</td>
       <td>${p.nombre_producto}</td>
       <td>${nombreTipo(p.tipo_producto)}</td>
-      <td>${p.stock_producto}</td>
+      <td>${formatNumber(p.stock_producto)}</td>
       <td>${formatCurrency(p.precio_unitario)}</td>
     </tr>`).join('');
 }
@@ -1003,7 +1272,7 @@ function updateSearchMovements(results) {
         <td>${formatDate(m.fecha_creacion)}</td>
         <td><span class="badge ${badgeClass}">${capitalizeFirst(m.tipo_movimiento)}</span></td>
         <td>${m.nombre_producto}</td>
-        <td>${m.cantidad}</td>
+        <td>${formatNumber(m.cantidad)}</td>
         <td>${m.motivo}</td>
       </tr>`;
   }).join('');
@@ -1029,6 +1298,8 @@ async function init() {
   const lastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   document.getElementById('report-date-from').value = lastMonth;
   document.getElementById('report-date-to').value = today;
+  document.getElementById('doc-date-from').value = lastMonth;
+  document.getElementById('doc-date-to').value = today;
 }
 
 init();

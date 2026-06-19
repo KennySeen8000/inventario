@@ -736,6 +736,12 @@ body {
   height: 32px;
 }
 
+.report-icon.blue { background: var(--primary-light); color: var(--primary); }
+.report-icon.green { background: var(--success-light); color: var(--success); }
+.report-icon.yellow { background: var(--warning-light); color: var(--warning); }
+.report-icon.red { background: var(--danger-light); color: var(--danger); }
+.report-icon.purple { background: #f3e8ff; color: #9333ea; }
+
 .report-card h3 {
   font-size: 1.125rem;
   font-weight: 600;

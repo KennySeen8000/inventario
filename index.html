@@ -57,6 +57,14 @@
           </svg>
           <span>Inventario</span>
         </button>
+        <button class="nav-item" data-view="suppliers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <path d="M20 8v6M23 11h-6"></path>
+          </svg>
+          <span>Proveedores</span>
+        </button>
         <button class="nav-item" data-view="reports">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -225,17 +233,17 @@
 
               <div class="form-group">
                 <label for="stock-producto">Stock Inicial *</label>
-                <input type="number" id="stock-producto" min="0" placeholder="0" required>
+                <input type="number" id="stock-producto" min="0" step="0.01" placeholder="0" required>
               </div>
               
               <div class="form-group">
                 <label for="stock-min-producto">Stock Minimo * (Alerta)</label>
-                <input type="number" id="stock-min-producto" min="0" placeholder="20" required>
+                <input type="number" id="stock-min-producto" min="0" step="0.01" placeholder="20" required>
               </div>
               
               <div class="form-group">
                 <label for="precio-producto">Precio Unitario *</label>
-                <input type="number" id="precio-producto" placeholder="0" required>
+                <input type="number" id="precio-producto" min="0" step="0.01" placeholder="0" required>
               </div>
               
 
@@ -279,7 +287,7 @@
                 </div>
                 <div class="form-group">
                   <label for="entry-quantity">Cantidad *</label>
-                  <input type="number" id="entry-quantity" min="1" required placeholder="Cantidad">
+                  <input type="number" id="entry-quantity" min="0" step="0.01" required placeholder="Cantidad">
                 </div>
                 <div class="form-group">
                   <label for="entry-warehouse">Almacen Destino</label>
@@ -290,6 +298,31 @@
                   </select>
                 </div>
                 <div id="campo-motivo"></div>
+                <div class="form-group">
+                  <label for="entry-proveedor">Proveedor / Empresa</label>
+                  <select id="entry-proveedor">
+                    <option value="">Seleccionar proveedor...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="entry-doc-type">Tipo de Documento</label>
+                  <select id="entry-doc-type">
+                    <option value="">Seleccionar...</option>
+                    <option value="FACTURA">Factura</option>
+                    <option value="BOLETA">Boleta</option>
+                    <option value="GUIA DE DESPACHO">Guía de Despacho</option>
+                    <option value="ORDEN DE COMPRA">Orden de Compra</option>
+                    <option value="OTRO">Otro</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="entry-doc-number">N° Documento</label>
+                  <input type="text" id="entry-doc-number" placeholder="Ej: 0012345" class="uppercase-input" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label for="entry-doc-date">Fecha de Recepción</label>
+                  <input type="date" id="entry-doc-date">
+                </div>
               </div>
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Registrar Entrada</button>
@@ -314,7 +347,7 @@
                 </div>
                 <div class="form-group">
                   <label for="exit-quantity">Cantidad *</label>
-                  <input type="number" id="exit-quantity" min="1" required placeholder="Cantidad">
+                  <input type="number" id="exit-quantity" min="0" step="0.01" required placeholder="Cantidad">
                 </div>
                 <div class="form-group">
                   <label for="exit-warehouse">Almacen Origen</label>
@@ -340,6 +373,29 @@
                     <option value="TRANSFERENCIA SALIDA">Transferencia Salida</option>
                     <option value="OTRO">Otro</option>
                   </select>
+                </div>
+                <div class="form-group">
+                  <label for="exit-empresa">Cliente / Empresa</label>
+                  <input type="text" id="exit-empresa" placeholder="Nombre del cliente o empresa" class="uppercase-input" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label for="exit-doc-type">Tipo de Documento</label>
+                  <select id="exit-doc-type">
+                    <option value="">Seleccionar...</option>
+                    <option value="FACTURA">Factura</option>
+                    <option value="BOLETA">Boleta</option>
+                    <option value="GUIA DE DESPACHO">Guía de Despacho</option>
+                    <option value="NOTA DE VENTA">Nota de Venta</option>
+                    <option value="OTRO">Otro</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="exit-doc-number">N° Documento</label>
+                  <input type="text" id="exit-doc-number" placeholder="Ej: 0012345" class="uppercase-input" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label for="exit-doc-date">Fecha de Emisión</label>
+                  <input type="date" id="exit-doc-date">
                 </div>
               </div>
               <div class="form-actions">
@@ -415,6 +471,8 @@
                       <th>Producto</th>
                       <th>Cantidad</th>
                       <th>Almacen</th>
+                      <th>Empresa</th>
+                      <th>Documento</th>
                       <th>Motivo</th>
                     </tr>
                   </thead>
@@ -481,6 +539,79 @@
         </div>
       </section>
 
+      <!-- Suppliers View -->
+      <section class="view" id="suppliers-view">
+        <div class="view-header">
+          <h1>Proveedores</h1>
+          <p class="view-subtitle">Base de datos de proveedores</p>
+        </div>
+
+        <div class="card form-card">
+          <h3>Nuevo Proveedor</h3>
+          <form id="supplier-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="supplier-rut">RUT</label>
+                <input type="text" id="supplier-rut" placeholder="Ej: 76.123.456-7" class="uppercase-input" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="supplier-name">Razón Social / Nombre *</label>
+                <input type="text" id="supplier-name" required placeholder="Nombre del proveedor" class="uppercase-input" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="supplier-giro">Giro</label>
+                <input type="text" id="supplier-giro" placeholder="Giro o rubro" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="supplier-contact">Contacto</label>
+                <input type="text" id="supplier-contact" placeholder="Persona de contacto" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="supplier-phone">Teléfono</label>
+                <input type="text" id="supplier-phone" placeholder="Ej: +56 9 1234 5678" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="supplier-email">Email</label>
+                <input type="email" id="supplier-email" placeholder="correo@empresa.cl" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="supplier-address">Dirección</label>
+                <input type="text" id="supplier-address" placeholder="Dirección" autocomplete="off">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="document.getElementById('supplier-form').reset()">Limpiar</button>
+              <button type="submit" class="btn btn-primary">Guardar Proveedor</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Listado de Proveedores</h3>
+            <span class="result-count" id="supplier-count">0 proveedores</span>
+          </div>
+          <div class="card-content">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>RUT</th>
+                    <th>Razón Social</th>
+                    <th>Giro</th>
+                    <th>Contacto</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="suppliers-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Reports View -->
       <section class="view" id="reports-view">
         <div class="view-header">
@@ -530,12 +661,34 @@
             <p>Productos que necesitan reposicion</p>
             <button class="btn btn-primary" onclick="generateLowStockReport()">Generar Reporte</button>
           </div>
+
+          <div class="card report-card">
+            <div class="report-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <h3>Documentación Ingresada</h3>
+            <p>Facturas, boletas y guías de entradas y salidas</p>
+            <div class="date-range">
+              <input type="date" id="doc-date-from">
+              <span>a</span>
+              <input type="date" id="doc-date-to">
+            </div>
+            <button class="btn btn-primary" onclick="generateDocumentationReport()">Generar Reporte</button>
+          </div>
         </div>
         
         <div class="card" id="report-result" style="display: none;">
           <div class="card-header">
             <h3 id="report-title">Resultado del Reporte</h3>
-            <button class="btn btn-secondary" onclick="exportReportCSV()">Exportar CSV</button>
+            <div class="filter-group">
+              <button class="btn btn-secondary" onclick="printReport()">Imprimir</button>
+              <button class="btn btn-secondary" onclick="exportReportCSV()">Exportar CSV</button>
+            </div>
           </div>
           <div class="card-content">
             <div class="table-container">
@@ -665,11 +818,11 @@
           </div>
           <div class="form-group">
             <label for="editar-stock-producto">Stock</label>
-            <input type="number" id="editar-stock-producto" min="0">
+            <input type="number" id="editar-stock-producto" min="0" step="0.01">
           </div>
           <div class="form-group">
             <label for="editar-stock-minimo">Stock Minimo</label>
-            <input type="number" id="editar-stock-minimo" min="0">
+            <input type="number" id="editar-stock-minimo" min="0" step="0.01">
           </div>
           <div class="form-group">
             <label for="editar-precio-unitario">Precio</label>
@@ -686,6 +839,53 @@
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Supplier Modal -->
+  <div class="modal-overlay" id="edit-supplier-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Editar Proveedor</h3>
+        <button class="modal-close" onclick="closeSupplierModal()">&times;</button>
+      </div>
+      <form id="edit-supplier-form">
+        <input type="hidden" id="editar-proveedor-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="editar-supplier-rut">RUT</label>
+            <input type="text" id="editar-supplier-rut">
+          </div>
+          <div class="form-group">
+            <label for="editar-supplier-name">Razón Social / Nombre</label>
+            <input type="text" id="editar-supplier-name" required>
+          </div>
+          <div class="form-group">
+            <label for="editar-supplier-giro">Giro</label>
+            <input type="text" id="editar-supplier-giro">
+          </div>
+          <div class="form-group">
+            <label for="editar-supplier-contact">Contacto</label>
+            <input type="text" id="editar-supplier-contact">
+          </div>
+          <div class="form-group">
+            <label for="editar-supplier-phone">Teléfono</label>
+            <input type="text" id="editar-supplier-phone">
+          </div>
+          <div class="form-group">
+            <label for="editar-supplier-email">Email</label>
+            <input type="email" id="editar-supplier-email">
+          </div>
+          <div class="form-group">
+            <label for="editar-supplier-address">Dirección</label>
+            <input type="text" id="editar-supplier-address">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeSupplierModal()">Cancelar</button>
           <button type="submit" class="btn btn-primary">Guardar Cambios</button>
         </div>
       </form>
