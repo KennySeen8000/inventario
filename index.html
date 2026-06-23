@@ -1,971 +1,413 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Stock - Sistema de Inventario</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-  <div class="app-container">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">
-          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-          </svg>
-          <span class="logo-text">StockControl</span>
-        </div>
-      </div>
-      
-      <nav class="sidebar-nav">
-        <button class="nav-item active" data-view="dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="9"></rect>
-            <rect x="14" y="3" width="7" height="5"></rect>
-            <rect x="14" y="12" width="7" height="9"></rect>
-            <rect x="3" y="16" width="7" height="5"></rect>
-          </svg>
-          <span>Dashboard</span>
-        </button>
-        <button class="nav-item" data-view="new-product">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-          </svg>
-          <span>Nuevo Producto</span>
-        </button>
-        <button class="nav-item" data-view="movements">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-            <polyline points="17 6 23 6 23 12"></polyline>
-          </svg>
-          <span>Movimientos</span>
-        </button>
-        <button class="nav-item" data-view="inventory">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <path d="M16 10a4 4 0 0 1-8 0"></path>
-          </svg>
-          <span>Inventario</span>
-        </button>
-        <button class="nav-item" data-view="suppliers">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="8.5" cy="7" r="4"></circle>
-            <path d="M20 8v6M23 11h-6"></path>
-          </svg>
-          <span>Proveedores</span>
-        </button>
-        <button class="nav-item" data-view="reports">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-          <span>Reportes</span>
-        </button>
-        <button class="nav-item" data-view="search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span>Buscar</span>
-        </button>
-      </nav>
-      
-      <div class="sidebar-footer">
-        <div class="connection-status" id="connection-status">
-          <span class="status-dot"></span>
-          <span class="status-text">Conectando...</span>
-        </div>
-      </div>
-    </aside>
+<html lang="es" class="bg-paper">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#07393c" />
+    <meta name="description" content="Control de stock privado para pequeño negocio. Escaneo de código de barras, entradas y salidas, alertas de stock mínimo, reportes e historial de movimientos." />
+    <title>Stock Barrio — Control de Inventario</title>
 
-    <!-- Mobile Header -->
-    <header class="mobile-header">
-      <button class="menu-toggle" id="menu-toggle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
+    <!-- Tailwind (Play CDN: rápido para empezar; ver README para build de producción) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // Paleta: 0a090c · f0edee · 07393c · 2c666e · 90ddf0
+              paper: "#f0edee",
+              ink: { DEFAULT: "#0a090c", soft: "#3a393d" },
+              brand: {
+                DEFAULT: "#07393c",
+                dark: "#052b2d",
+                mid: "#2c666e",
+                sky: "#90ddf0",
+              },
+            },
+            fontFamily: {
+              sans: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+
+  <body class="min-h-screen bg-paper text-ink antialiased">
+    <!-- ============ PANTALLA DE CARGA ============ -->
+    <div id="splash" class="fixed inset-0 z-50 flex items-center justify-center bg-paper">
+      <div class="flex flex-col items-center gap-3 text-brand">
+        <svg class="h-10 w-10 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
         </svg>
-      </button>
-      <span class="mobile-title">StockControl</span>
-    </header>
+        <p class="text-sm font-medium text-ink/50">Cargando…</p>
+      </div>
+    </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Dashboard View -->
-      <section class="view active" id="dashboard-view">
-        <div class="view-header">
-          <h1>Dashboard - prueba</h1>
-          <p class="view-subtitle">Resumen general del inventario</p>
-        </div>
-        
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <path d="M16 10a4 4 0 0 1-8 0"></path>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-productos" value=0></span>
-              <span class="stat-label">Total Productos</span>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                <polyline points="17 6 23 6 23 12"></polyline>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-movements">0</span>
-              <span class="stat-label">Total Movimientos</span>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="1" x2="12" y2="23"></line>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-value">$0</span>
-              <span class="stat-label">Valor Total</span>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon yellow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="low-stock">0</span>
-              <span class="stat-label">Stock Bajo</span>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="out-of-stock">0</span>
-              <span class="stat-label">Sin Stock</span>
-            </div>
-          </div>
-        </div>
+    <!-- ============ AVISO: FALTA CONFIGURAR FIREBASE ============ -->
+    <div id="config-warning" class="hidden fixed inset-0 z-40 items-center justify-center bg-paper p-6">
+      <div class="max-w-md rounded-2xl bg-white p-6 shadow-lg ring-1 ring-ink/10">
+        <h2 class="text-lg font-bold text-ink">Configura Firebase</h2>
+        <p class="mt-2 text-sm leading-relaxed text-ink/70">
+          Para usar la app, abre el archivo <code class="rounded bg-paper px-1 py-0.5 font-mono text-brand">js/config.js</code>
+          y reemplaza los valores <code class="rounded bg-paper px-1 py-0.5 font-mono text-brand">TU_…</code> con las credenciales de tu proyecto Firebase. Las encuentras en
+          <span class="font-medium">Configuración del proyecto → Tus apps → SDK</span>.
+        </p>
+      </div>
+    </div>
 
-        <div class="dashboard-grid">
-          <div class="card">
-            <div class="card-header">
-              <h3>Movimientos Recientes</h3>
-            </div>
-            <div class="card-content">
-              <div class="recent-list" id="recent-movements"></div>
-            </div>
-          </div>
-          
-          <div class="card">
-            <div class="card-header">
-              <h3>Alertas de Stock</h3>
-            </div>
-            <div class="card-content">
-              <div class="alert-list" id="stock-alerts"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- New Product View -->
-      <section class="view" id="new-product-view">
-        <div class="view-header">
-          <h1>Nuevo Producto</h1>
-          <p class="view-subtitle">Registrar un nuevo producto en el inventario</p>
-        </div>
-        
-        <div class="card form-card">
-          <form id="formulario-producto">
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="codigo-producto">Codigo *</label>
-                <input type="text" id="codigo-producto" required placeholder="Ej: PROD-001" class="uppercase-input">
-              </div>
-              
-              <div class="form-group">
-                <label for="nombre-producto">Nombre *</label>
-                <input type="text" id="nombre-producto" required placeholder="Nombre del producto" class="uppercase-input">
-              </div>
-              
-              <div class="form-group" id="campo-unidad-medida"></div>
-              
-              <div class="form-group" id="campo-tipo-producto"></div>
-
-              <div class="form-group" id="campo-almacen"></div>
-
-
-              <div class="form-group">
-                <label for="stock-producto">Stock Inicial *</label>
-                <input type="number" id="stock-producto" min="0" step="0.01" placeholder="0" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="stock-min-producto">Stock Minimo * (Alerta)</label>
-                <input type="number" id="stock-min-producto" min="0" step="0.01" placeholder="20" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="precio-producto">Precio Unitario *</label>
-                <input type="number" id="precio-producto" min="0" step="0.01" placeholder="0" required>
-              </div>
-              
-
-            </div>
-            
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" onclick="clearProductForm()">Limpiar</button>
-              <button type="submit" class="btn btn-primary">Guardar Producto</button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      <!-- Movements View -->
-      <section class="view" id="movements-view">
-        <div class="view-header">
-          <h1>Movimientos</h1>
-          <p class="view-subtitle">Gestionar entradas, salidas y transferencias</p>
-        </div>
-        
-        <div class="tabs">
-          <button class="tab active" data-tab="entry">Entrada</button>
-          <button class="tab" data-tab="exit">Salida</button>
-          <button class="tab" data-tab="transfer">Transferencia</button>
-          <button class="tab" data-tab="history">Historial</button>
-        </div>
-        
-        <!-- Entry Tab -->
-        <div class="tab-content active" id="entry-tab">
-          <div class="card form-card">
-            <h3>Registrar Entrada</h3>
-            <form id="entry-form">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="entry-product">Codigo Producto *</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="entry-product" required placeholder="Escriba el codigo..." class="uppercase-input" autocomplete="off">
-                    <div class="autocomplete-list" id="entry-product-list"></div>
-                  </div>
-                  <input type="hidden" id="entry-product-id">
-                </div>
-                <div class="form-group">
-                  <label for="entry-quantity">Cantidad *</label>
-                  <input type="number" id="entry-quantity" min="0" step="0.01" required placeholder="Cantidad">
-                </div>
-                <div class="form-group">
-                  <label for="entry-warehouse">Almacen Destino</label>
-                  <select id="entry-warehouse">
-                    <option value="0">Principal</option>
-                    <option value="1">Secundario</option>
-                    <option value="2">Bodega</option>
-                  </select>
-                </div>
-                <div id="campo-motivo"></div>
-                <div class="form-group">
-                  <label for="entry-proveedor-rut">Proveedor (RUT)</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="entry-proveedor-rut" placeholder="Escriba el RUT o nombre..." class="uppercase-input" autocomplete="off">
-                    <div class="autocomplete-list" id="entry-proveedor-list"></div>
-                  </div>
-                  <input type="hidden" id="entry-proveedor-id">
-                  <small class="field-hint" id="entry-proveedor-info"></small>
-                </div>
-                <div class="form-group">
-                  <label for="entry-proveedor-nombre">Razon Social</label>
-                  <input type="text" id="entry-proveedor-nombre" placeholder="Se completa automaticamente" readonly>
-                </div>
-                <div class="form-group">
-                  <label for="entry-doc-type">Tipo de Documento</label>
-                  <select id="entry-doc-type">
-                    <option value="">Seleccionar...</option>
-                    <option value="FACTURA">Factura</option>
-                    <option value="BOLETA">Boleta</option>
-                    <option value="GUIA DE DESPACHO">Guía de Despacho</option>
-                    <option value="ORDEN DE COMPRA">Orden de Compra</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="entry-doc-number">N° Documento</label>
-                  <input type="text" id="entry-doc-number" placeholder="Ej: 0012345" class="uppercase-input" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="entry-doc-date">Fecha de Recepción</label>
-                  <input type="date" id="entry-doc-date">
-                </div>
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Registrar Entrada</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        
-        <!-- Exit Tab -->
-        <div class="tab-content" id="exit-tab">
-          <div class="card form-card">
-            <h3>Registrar Salida</h3>
-            <form id="exit-form">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="exit-product">Codigo Producto *</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="exit-product" required placeholder="Escriba el codigo..." class="uppercase-input" autocomplete="off">
-                    <div class="autocomplete-list" id="exit-product-list"></div>
-                  </div>
-                  <input type="hidden" id="exit-product-id">
-                </div>
-                <div class="form-group">
-                  <label for="exit-quantity">Cantidad *</label>
-                  <input type="number" id="exit-quantity" min="0" step="0.01" required placeholder="Cantidad">
-                </div>
-                <div class="form-group">
-                  <label for="exit-warehouse">Almacen Origen</label>
-                  <select id="exit-warehouse">
-                    <option value="0">Principal</option>
-                    <option value="1">Secundario</option>
-                    <option value="2">Bodega</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="exit-reason">Motivo *</label>
-                  <select id="exit-reason" required>
-                    <option value="">Seleccionar motivo...</option>
-                    <option value="VENTA">Venta</option>
-                    <option value="CONSUMO INTERNO">Consumo Interno</option>
-                    <option value="MERMA">Merma</option>
-                    <option value="ROBO">Robo</option>
-                    <option value="DETERIORO">Deterioro</option>
-                    <option value="VENCIMIENTO">Vencimiento</option>
-                    <option value="MUESTRA">Muestra</option>
-                    <option value="DONACION">Donacion</option>
-                    <option value="AJUSTE INVENTARIO">Ajuste de Inventario</option>
-                    <option value="TRANSFERENCIA SALIDA">Transferencia Salida</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="exit-empresa">Cliente / Empresa</label>
-                  <input type="text" id="exit-empresa" placeholder="Nombre del cliente o empresa" class="uppercase-input" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="exit-doc-type">Tipo de Documento</label>
-                  <select id="exit-doc-type">
-                    <option value="">Seleccionar...</option>
-                    <option value="FACTURA">Factura</option>
-                    <option value="BOLETA">Boleta</option>
-                    <option value="GUIA DE DESPACHO">Guía de Despacho</option>
-                    <option value="NOTA DE VENTA">Nota de Venta</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="exit-doc-number">N° Documento</label>
-                  <input type="text" id="exit-doc-number" placeholder="Ej: 0012345" class="uppercase-input" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="exit-doc-date">Fecha de Emisión</label>
-                  <input type="date" id="exit-doc-date">
-                </div>
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Registrar Salida</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        
-        <!-- Transfer Tab -->
-        <div class="tab-content" id="transfer-tab">
-          <div class="card form-card">
-            <h3>Registrar Transferencia</h3>
-            <form id="transfer-form">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="transfer-product">Codigo Producto *</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="transfer-product" required placeholder="Escriba el codigo..." class="uppercase-input" autocomplete="off">
-                    <div class="autocomplete-list" id="transfer-product-list"></div>
-                  </div>
-                  <input type="hidden" id="transfer-product-id">
-                </div>
-                <div class="form-group">
-                  <label for="transfer-quantity">Cantidad *</label>
-                  <input type="number" id="transfer-quantity" min="1" required placeholder="Cantidad">
-                </div>
-                <div class="form-group">
-                  <label for="transfer-from">Almacen Origen *</label>
-                  <select id="transfer-from" required>
-                    <option value="0">Principal</option>
-                    <option value="1">Secundario</option>
-                    <option value="2">Bodega</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="transfer-to">Almacen Destino *</label>
-                  <select id="transfer-to" required>
-                    <option value="1">Secundario</option>
-                    <option value="0">Principal</option>
-                    <option value="2">Bodega</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Registrar Transferencia</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        
-        <!-- History Tab -->
-        <div class="tab-content" id="history-tab">
-          <div class="card">
-            <div class="card-header">
-              <h3>Historial de Movimientos</h3>
-              <div class="filter-group">
-                <select id="history-filter">
-                  <option value="all">Todos</option>
-                  <option value="entrada">Entradas</option>
-                  <option value="salida">Salidas</option>
-                  <option value="transferencia">Transferencias</option>
-                </select>
-              </div>
-            </div>
-            <div class="card-content">
-              <div class="table-container">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Fecha</th>
-                      <th>Tipo</th>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Almacen</th>
-                      <th>Empresa</th>
-                      <th>Documento</th>
-                      <th>Motivo</th>
-                    </tr>
-                  </thead>
-                  <tbody id="movements-table"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Inventory View -->
-      <section class="view" id="inventory-view">
-        <div class="view-header">
-          <h1>Inventario</h1>
-          <p class="view-subtitle">Lista completa de productos</p>
-        </div>
-        
-        <div class="card">
-          <div class="card-header">
-            <div class="filter-group">
-              <select id="inventory-group-filter">
-                <option value="all">Todos los grupos</option>
-                <option value="0">Electronica</option>
-                <option value="1">Alimentos</option>
-                <option value="2">Bebidas</option>
-                <option value="3">Limpieza</option>
-                <option value="4">Papeleria</option>
-                <option value="5">Herramientas</option>
-                <option value="6">Ropa</option>
-                <option value="7">Hogar</option>
-                <option value="8">Otros</option>
-              </select>
-              <select id="inventory-status-filter">
-                <option value="all">Todos los estados</option>
-                <option value="available">Disponible</option>
-                <option value="low">Stock Bajo</option>
-                <option value="out">Sin Stock</option>
-              </select>
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Código</th>
-                    <th>Producto</th>
-                    <th>Tipo</th>
-                    <th>Stock</th>
-                    <th>Unidad</th>
-                    <th>Precio Sin IVA</th>
-                    <th>Precio Con IVA</th>
-                    <th>Total Sin IVA</th>
-                    <th>Total Con IVA</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="inventory-table"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Suppliers View -->
-      <section class="view" id="suppliers-view">
-        <div class="view-header">
-          <h1>Proveedores</h1>
-          <p class="view-subtitle">Base de datos de proveedores</p>
-        </div>
-
-        <div class="card form-card">
-          <h3>Nuevo Proveedor</h3>
-          <form id="supplier-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="supplier-rut">RUT</label>
-                <input type="text" id="supplier-rut" placeholder="Ej: 76.123.456-7" class="uppercase-input" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="supplier-name">Razón Social / Nombre *</label>
-                <input type="text" id="supplier-name" required placeholder="Nombre del proveedor" class="uppercase-input" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="supplier-giro">Giro</label>
-                <input type="text" id="supplier-giro" placeholder="Giro o rubro" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="supplier-contact">Contacto</label>
-                <input type="text" id="supplier-contact" placeholder="Persona de contacto" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="supplier-phone">Teléfono</label>
-                <input type="text" id="supplier-phone" placeholder="Ej: +56 9 1234 5678" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="supplier-email">Email</label>
-                <input type="email" id="supplier-email" placeholder="correo@empresa.cl" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="supplier-address">Dirección</label>
-                <input type="text" id="supplier-address" placeholder="Dirección" autocomplete="off">
-              </div>
-            </div>
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" onclick="document.getElementById('supplier-form').reset()">Limpiar</button>
-              <button type="submit" class="btn btn-primary">Guardar Proveedor</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>Listado de Proveedores</h3>
-            <span class="result-count" id="supplier-count">0 proveedores</span>
-          </div>
-          <div class="card-content">
-            <div class="table-container">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>RUT</th>
-                    <th>Razón Social</th>
-                    <th>Giro</th>
-                    <th>Contacto</th>
-                    <th>Teléfono</th>
-                    <th>Email</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="suppliers-table"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Reports View -->
-      <section class="view" id="reports-view">
-        <div class="view-header">
-          <h1>Reportes</h1>
-          <p class="view-subtitle">Generar reportes del inventario</p>
-        </div>
-        
-        <div class="reports-grid">
-          <div class="card report-card">
-            <div class="report-icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-              </svg>
-            </div>
-            <h3>Inventario Actual</h3>
-            <p>Reporte completo del stock con valores</p>
-            <button class="btn btn-primary" onclick="generateInventoryReport()">Generar Reporte</button>
-          </div>
-          
-          <div class="card report-card">
-            <div class="report-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                <polyline points="17 6 23 6 23 12"></polyline>
-              </svg>
-            </div>
-            <h3>Movimientos por Fecha</h3>
-            <p>Filtrar movimientos por rango de fechas</p>
-            <div class="date-range">
-              <input type="date" id="report-date-from">
-              <span>a</span>
-              <input type="date" id="report-date-to">
-            </div>
-            <button class="btn btn-primary" onclick="generateMovementsReport()">Generar Reporte</button>
-          </div>
-          
-          <div class="card report-card">
-            <div class="report-icon yellow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-            </div>
-            <h3>Stock Bajo</h3>
-            <p>Productos que necesitan reposicion</p>
-            <button class="btn btn-primary" onclick="generateLowStockReport()">Generar Reporte</button>
-          </div>
-
-          <div class="card report-card">
-            <div class="report-icon purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-              </svg>
-            </div>
-            <h3>Documentación Ingresada</h3>
-            <p>Facturas, boletas y guías de entradas y salidas</p>
-            <div class="form-group" style="margin-bottom: 1rem; text-align: left;">
-              <label for="doc-type-filter">Tipo de movimiento</label>
-              <select id="doc-type-filter">
-                <option value="all">Entradas y Salidas</option>
-                <option value="entrada">Solo Entradas</option>
-                <option value="salida">Solo Salidas</option>
-              </select>
-            </div>
-            <div class="date-range">
-              <input type="date" id="doc-date-from">
-              <span>a</span>
-              <input type="date" id="doc-date-to">
-            </div>
-            <button class="btn btn-primary" onclick="generateDocumentationReport()">Generar Reporte</button>
-          </div>
-        </div>
-        
-        <div class="card" id="report-result" style="display: none;">
-          <div class="card-header">
-            <h3 id="report-title">Resultado del Reporte</h3>
-            <div class="filter-group">
-              <button class="btn btn-secondary" onclick="exportReportExcel()">Excel</button>
-              <button class="btn btn-secondary" onclick="exportReportPDF()">PDF</button>
-              <button class="btn btn-secondary" onclick="printReport()">Imprimir</button>
-              <button class="btn btn-secondary" onclick="exportReportCSV()">CSV</button>
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="table-container">
-              <table class="data-table">
-                <thead id="report-thead"></thead>
-                <tbody id="report-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Search View -->
-      <section class="view" id="search-view">
-        <div class="view-header">
-          <h1>Buscar</h1>
-          <p class="view-subtitle">Busqueda global en productos y movimientos</p>
-        </div>
-        
-        <div class="search-container">
-          <div class="search-input-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    <!-- ============ LOGIN ============ -->
+    <section id="login-view" class="hidden min-h-screen items-center justify-center px-5">
+      <div class="w-full max-w-sm">
+        <div class="mb-8 text-center">
+          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand text-white shadow-lg">
+            <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+              <path d="m3.3 7 8.7 5 8.7-5"></path>
+              <path d="M12 22V12"></path>
             </svg>
-            <input type="text" id="global-search" placeholder="Buscar por nombre, codigo, grupo o motivo...">
           </div>
+          <h1 class="text-2xl font-bold text-ink">Stock Barrio</h1>
+          <p class="mt-1 text-sm text-ink/50">Inicia sesión para gestionar tu inventario</p>
         </div>
-        
-        <div class="search-results">
-          <div class="card">
-            <div class="card-header">
-              <h3>Productos Encontrados</h3>
-              <span class="result-count" id="product-count">0 resultados</span>
+
+        <form id="login-form" class="space-y-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-ink/10">
+          <div>
+            <label for="login-email" class="mb-1 block text-sm font-medium text-ink/80">Correo</label>
+            <input id="login-email" type="email" required autocomplete="email"
+              class="w-full rounded-xl border-ink/15 text-base focus:border-brand focus:ring-brand"
+              placeholder="tu@correo.com" />
+          </div>
+          <div>
+            <label for="login-password" class="mb-1 block text-sm font-medium text-ink/80">Contraseña</label>
+            <input id="login-password" type="password" required autocomplete="current-password" minlength="6"
+              class="w-full rounded-xl border-ink/15 text-base focus:border-brand focus:ring-brand"
+              placeholder="••••••••" />
+          </div>
+          <p id="login-error" class="hidden rounded-lg bg-ink/5 px-3 py-2 text-sm text-ink ring-1 ring-ink/15" role="alert"></p>
+          <button type="submit"
+            class="w-full rounded-xl bg-brand px-4 py-3 text-base font-semibold text-white shadow-sm transition active:scale-[0.98] hover:bg-brand-dark">
+            Entrar
+          </button>
+        </form>
+        <p class="mt-4 text-center text-xs text-ink/40">
+          Acceso privado. Las cuentas las crea el administrador en Firebase.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ APP ============ -->
+    <div id="app-view" class="hidden pb-24">
+      <!-- Header -->
+      <header class="sticky top-0 z-20 flex items-center justify-between border-b border-ink/10 bg-white px-4 py-3">
+        <div class="flex items-center gap-2">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </span>
+          <h1 id="header-title" class="text-lg font-bold text-ink">Inventario</h1>
+        </div>
+        <button id="logout-btn" class="rounded-lg p-2 text-ink/50 transition hover:bg-ink/5 hover:text-ink" aria-label="Cerrar sesión">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+      </header>
+
+      <main class="px-4 py-4">
+        <!-- ====== TAB: ESCÁNER (lector USB) ====== -->
+        <section id="tab-scan" class="tab-panel">
+          <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/10">
+            <h2 class="text-base font-semibold text-ink">Escanear producto</h2>
+            <p class="mt-1 text-sm text-ink/50">Dispará el lector USB sobre el código. También podés escribirlo y presionar Enter.</p>
+
+            <div class="mt-4 flex items-center gap-2 rounded-xl bg-paper px-3 py-2.5 text-sm text-ink/70">
+              <span class="flex h-2.5 w-2.5 shrink-0 rounded-full bg-brand"></span>
+              Lector listo — escaneá cuando quieras
             </div>
-            <div class="card-content">
-              <div class="table-container">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Codigo</th>
-                      <th>Nombre</th>
-                      <th>Grupo</th>
-                      <th>Stock</th>
-                      <th>Precio</th>
-                    </tr>
-                  </thead>
-                  <tbody id="search-products"></tbody>
-                </table>
+
+            <label for="scan-input" class="mb-1 mt-4 block text-sm font-medium text-ink/80">Código de barra</label>
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10v4M10 10v4M14 10v4M18 10v4"/></svg>
+                <input id="scan-input" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false"
+                  placeholder="Escaneá o escribí el código…"
+                  class="h-12 w-full rounded-xl border-ink/15 pl-10 font-mono text-lg focus:border-brand focus:ring-brand" />
               </div>
+              <button id="scan-go-btn"
+                class="h-12 shrink-0 rounded-xl bg-brand px-5 font-semibold text-white shadow-sm transition active:scale-[0.98] hover:bg-brand-dark">
+                Buscar
+              </button>
+            </div>
+
+            <p class="mt-3 text-xs text-ink/40">
+              Compatible con lectores USB tipo teclado (2D 7100N y similares). Dejá esta pantalla abierta para escanear varios productos seguidos.
+            </p>
+          </div>
+        </section>
+
+        <!-- ====== TAB: INVENTARIO ====== -->
+        <section id="tab-inventory" class="tab-panel hidden">
+          <!-- Estado de sincronización con la nube -->
+          <div class="mb-3 flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs shadow-sm ring-1 ring-ink/10">
+            <span class="flex items-center gap-1.5 text-ink/60">
+              <svg class="h-3.5 w-3.5 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19a4.5 4.5 0 0 0 0-9h-1.8A7 7 0 1 0 4 15.7"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+              <span id="sync-status">…</span>
+            </span>
+            <button id="sync-btn"
+              class="flex items-center gap-1.5 rounded-lg bg-ink/5 px-2.5 py-1.5 font-semibold text-ink/80 transition active:scale-95 hover:bg-ink/10 disabled:opacity-40">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+              Sincronizar
+            </button>
+          </div>
+
+          <div class="mb-3 flex items-center gap-2">
+            <div class="relative flex-1">
+              <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+              <input id="inventory-search" type="search" placeholder="Buscar por nombre o código"
+                class="w-full rounded-xl border-ink/15 pl-9 text-sm focus:border-brand focus:ring-brand" />
+            </div>
+            <button id="add-product-btn" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-sm transition active:scale-95 hover:bg-brand-dark" aria-label="Agregar producto">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+
+          <!-- Resumen de valor de inventario -->
+          <div id="inventory-summary" class="mb-3 hidden grid grid-cols-3 gap-2">
+            <div class="rounded-xl border border-ink/10 bg-white p-3 text-center shadow-sm">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-ink/40">Costo</p>
+              <p id="summary-cost" class="mt-0.5 text-base font-bold text-ink">$0</p>
+            </div>
+            <div class="rounded-xl border border-ink/10 bg-white p-3 text-center shadow-sm">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-ink/40">Venta</p>
+              <p id="summary-sale" class="mt-0.5 text-base font-bold text-ink">$0</p>
+            </div>
+            <div class="rounded-xl border border-brand/30 bg-brand-sky/25 p-3 text-center shadow-sm">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-brand">Ganancia</p>
+              <p id="summary-profit" class="mt-0.5 text-base font-bold text-brand">$0</p>
             </div>
           </div>
-          
-          <div class="card">
-            <div class="card-header">
-              <h3>Movimientos Encontrados</h3>
-              <span class="result-count" id="movement-count">0 resultados</span>
+
+          <div id="low-stock-banner" class="mb-3 hidden items-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm text-paper">
+            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span id="low-stock-text"></span>
+          </div>
+
+          <ul id="inventory-list" class="space-y-2"></ul>
+          <p id="inventory-empty" class="hidden py-12 text-center text-sm text-ink/40">No hay productos todavía. Toca el botón + para agregar el primero.</p>
+        </section>
+
+        <!-- ====== TAB: REPORTES ====== -->
+        <section id="tab-reports" class="tab-panel hidden">
+          <h2 class="text-base font-semibold text-ink">Resumen de inventario</h2>
+          <p class="mt-1 text-sm text-ink/50">Una foto del estado actual de tu negocio.</p>
+
+          <!-- Tarjetas de valor -->
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/10">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-ink/40">Productos</p>
+              <p id="rep-total-products" class="mt-1 text-2xl font-bold text-ink">0</p>
             </div>
-            <div class="card-content">
-              <div class="table-container">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Fecha</th>
-                      <th>Tipo</th>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Motivo</th>
-                    </tr>
-                  </thead>
-                  <tbody id="search-movements"></tbody>
-                </table>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/10">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-ink/40">Unidades</p>
+              <p id="rep-total-units" class="mt-1 text-2xl font-bold text-ink">0</p>
+            </div>
+          </div>
+
+          <div class="mt-2 grid grid-cols-3 gap-2">
+            <div class="rounded-2xl bg-white p-3 text-center shadow-sm ring-1 ring-ink/10">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-ink/40">Costo</p>
+              <p id="rep-cost" class="mt-0.5 text-base font-bold text-ink">$0</p>
+            </div>
+            <div class="rounded-2xl bg-white p-3 text-center shadow-sm ring-1 ring-ink/10">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-ink/40">Venta</p>
+              <p id="rep-sale" class="mt-0.5 text-base font-bold text-ink">$0</p>
+            </div>
+            <div class="rounded-2xl border border-brand/30 bg-brand-sky/25 p-3 text-center shadow-sm">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-brand">Ganancia</p>
+              <p id="rep-profit" class="mt-0.5 text-base font-bold text-brand">$0</p>
+            </div>
+          </div>
+
+          <!-- Movimientos de hoy -->
+          <h3 class="mt-6 text-sm font-semibold uppercase tracking-wide text-ink/50">Movimientos de hoy</h3>
+          <div class="mt-2 grid grid-cols-2 gap-2">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/10">
+              <div class="flex items-center gap-2 text-brand">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span class="text-xs font-semibold uppercase tracking-wide">Entradas</span>
               </div>
+              <p id="rep-in-units" class="mt-1 text-2xl font-bold text-ink">0</p>
+              <p id="rep-in-ops" class="text-xs text-ink/40">0 operaciones</p>
+            </div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-ink/10">
+              <div class="flex items-center gap-2 text-brand-mid">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span class="text-xs font-semibold uppercase tracking-wide">Salidas</span>
+              </div>
+              <p id="rep-out-units" class="mt-1 text-2xl font-bold text-ink">0</p>
+              <p id="rep-out-ops" class="text-xs text-ink/40">0 operaciones</p>
             </div>
           </div>
-        </div>
-      </section>
-    </main>
-  </div>
 
-  <!-- Edit Product Modal -->
-  <div class="modal-overlay" id="edit-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Editar Producto</h3>
-        <button class="modal-close" onclick="closeEditModal()">&times;</button>
-      </div>
-      <form id="edit-form">
-        <input type="hidden" id="editar-producto-id">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="editar-codigo-producto">Codigo</label>
-            <input type="text" id="editar-codigo-producto" required>
+          <!-- Stock bajo -->
+          <h3 class="mt-6 text-sm font-semibold uppercase tracking-wide text-ink/50">Stock bajo el mínimo</h3>
+          <ul id="rep-low-list" class="mt-2 space-y-2"></ul>
+          <p id="rep-low-empty" class="hidden rounded-xl bg-white px-4 py-6 text-center text-sm text-ink/40 ring-1 ring-ink/10">Todo en orden: ningún producto bajo el mínimo.</p>
+        </section>
+
+        <!-- ====== TAB: HISTORIAL ====== -->
+        <section id="tab-history" class="tab-panel hidden">
+          <div class="mb-1 flex items-center justify-between">
+            <h2 class="text-base font-semibold text-ink">Movimientos de hoy</h2>
+            <button id="export-csv-btn"
+              class="flex items-center gap-1.5 rounded-lg border border-ink/15 px-3 py-1.5 text-xs font-semibold text-ink/80 transition active:scale-95 hover:bg-paper disabled:opacity-40"
+              disabled>
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              CSV
+            </button>
           </div>
-          <div class="form-group">
-            <label for="editar-nombre-producto">Nombre</label>
-            <input type="text" id="editar-nombre-producto" required>
-          </div>
-          <div class="form-group">
-            <label for="editar-unidad-producto">Unidad de Medida</label>
-            <select id="editar-unidad-producto" required>
-              <option value="0">Unidad</option>
-              <option value="1">Kilogramo (kg)</option>
-              <option value="2">Gramo (g)</option>
-              <option value="3">Litro (l)</option>
-              <option value="4">Mililitro (ml)</option>
-              <option value="5">Metro (m)</option>
-              <option value="6">Centimetro (cm)</option>
-              <option value="7">Caja</option>
-              <option value="8">Paquete</option>
-              <option value="9">Docena</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="editar-tipo-producto">Grupo</label>
-            <select id="editar-tipo-producto" required>
-              <option value="0">Electronica</option>
-              <option value="1">Alimentos</option>
-              <option value="2">Bebidas</option>
-              <option value="3">Limpieza</option>
-              <option value="4">Papeleria</option>
-              <option value="5">Herramientas</option>
-              <option value="6">Ropa</option>
-              <option value="7">Hogar</option>
-              <option value="8">Otros</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="editar-stock-producto">Stock</label>
-            <input type="number" id="editar-stock-producto" min="0" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="editar-stock-minimo">Stock Minimo</label>
-            <input type="number" id="editar-stock-minimo" min="0" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="editar-precio-unitario">Precio</label>
-            <input type="number" id="editar-precio-unitario" min="0" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="editar-almacen-producto">Almacen</label>
-            <select id="editar-almacen-producto">
-              <option value="0">Principal</option>
-              <option value="1">Secundario</option>
-              <option value="2">Bodega</option>
-            </select>
-          </div>
+          <span id="history-date" class="mb-3 block text-sm text-ink/40"></span>
+          <ul id="history-list" class="space-y-2"></ul>
+          <p id="history-empty" class="hidden py-12 text-center text-sm text-ink/40">Aún no hay movimientos registrados hoy.</p>
+        </section>
+      </main>
+
+      <!-- Bottom nav -->
+      <nav class="fixed inset-x-0 bottom-0 z-20 border-t border-ink/10 bg-white">
+        <div class="mx-auto grid max-w-lg grid-cols-4">
+          <button data-tab="tab-scan" class="nav-btn flex flex-col items-center gap-1 py-2.5 text-brand">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5v14M7 5v14M11 5v14M14 5v14M18 5v14M21 5v14"/></svg>
+            <span class="text-xs font-medium">Escanear</span>
+          </button>
+          <button data-tab="tab-inventory" class="nav-btn flex flex-col items-center gap-1 py-2.5 text-ink/40">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7h-9M14 17H5M17 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM7 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/></svg>
+            <span class="text-xs font-medium">Inventario</span>
+          </button>
+          <button data-tab="tab-reports" class="nav-btn flex flex-col items-center gap-1 py-2.5 text-ink/40">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
+            <span class="text-xs font-medium">Reportes</span>
+          </button>
+          <button data-tab="tab-history" class="nav-btn flex flex-col items-center gap-1 py-2.5 text-ink/40">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+            <span class="text-xs font-medium">Historial</span>
+          </button>
         </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </div>
-      </form>
+      </nav>
     </div>
-  </div>
 
-  <!-- Edit Supplier Modal -->
-  <div class="modal-overlay" id="edit-supplier-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Editar Proveedor</h3>
-        <button class="modal-close" onclick="closeSupplierModal()">&times;</button>
+    <!-- ============ MODAL: OPERACIÓN RÁPIDA (sumar / restar) ============ -->
+    <div id="operation-modal" class="modal hidden">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-sheet">
+        <div class="mx-auto mb-3 h-1.5 w-12 rounded-full bg-ink/20"></div>
+        <div id="operation-product-info" class="rounded-xl bg-paper p-3 text-center">
+          <p id="op-product-name" class="text-lg font-bold text-ink">—</p>
+          <p class="text-sm text-ink/50">Código: <span id="op-product-code" class="font-mono"></span></p>
+          <p class="mt-1 text-sm">Stock actual: <span id="op-product-stock" class="font-bold text-ink"></span></p>
+        </div>
+
+        <div class="mt-4">
+          <label for="op-quantity" class="mb-1 block text-sm font-medium text-ink/80">Cantidad</label>
+          <div class="flex items-center gap-2">
+            <button type="button" id="op-minus" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ink/10 text-2xl font-bold text-ink active:scale-95">−</button>
+            <input id="op-quantity" type="number" inputmode="numeric" min="1" value="1"
+              class="h-12 w-full rounded-xl border-ink/15 text-center text-xl font-bold focus:border-brand focus:ring-brand" />
+            <button type="button" id="op-plus" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ink/10 text-2xl font-bold text-ink active:scale-95">+</button>
+          </div>
+        </div>
+
+        <div class="mt-5 grid grid-cols-2 gap-3">
+          <button id="op-entrada-btn" class="flex flex-col items-center gap-1 rounded-xl bg-brand px-4 py-4 font-semibold text-white shadow-sm transition active:scale-[0.98] hover:bg-brand-dark">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Sumar stock
+          </button>
+          <button id="op-salida-btn" class="flex flex-col items-center gap-1 rounded-xl bg-brand-mid px-4 py-4 font-semibold text-white shadow-sm transition active:scale-[0.98] hover:bg-brand">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Restar venta
+          </button>
+        </div>
+        <button data-close class="mt-3 w-full rounded-xl py-2.5 text-sm font-medium text-ink/50 hover:bg-paper">Cancelar</button>
       </div>
-      <form id="edit-supplier-form">
-        <input type="hidden" id="editar-proveedor-id">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="editar-supplier-rut">RUT</label>
-            <input type="text" id="editar-supplier-rut">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-name">Razón Social / Nombre</label>
-            <input type="text" id="editar-supplier-name" required>
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-giro">Giro</label>
-            <input type="text" id="editar-supplier-giro">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-contact">Contacto</label>
-            <input type="text" id="editar-supplier-contact">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-phone">Teléfono</label>
-            <input type="text" id="editar-supplier-phone">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-email">Email</label>
-            <input type="email" id="editar-supplier-email">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-address">Dirección</label>
-            <input type="text" id="editar-supplier-address">
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeSupplierModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- Quick Supplier Modal (desde Movimientos) -->
-  <div class="modal-overlay" id="quick-supplier-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Registrar Proveedor</h3>
-        <button class="modal-close" onclick="closeQuickSupplierModal()">&times;</button>
+    <!-- ============ MODAL: PRODUCTO NO ENCONTRADO ============ -->
+    <div id="notfound-modal" class="modal hidden">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-sheet text-center">
+        <div class="mx-auto mb-3 h-1.5 w-12 rounded-full bg-ink/20"></div>
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-sky/30 text-brand">
+          <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="11" y1="8" x2="11" y2="12"/><line x1="11" y1="15" x2="11.01" y2="15"/></svg>
+        </div>
+        <h3 class="mt-3 text-lg font-bold text-ink">Producto no registrado</h3>
+        <p class="mt-1 text-sm text-ink/50">El código <span id="notfound-code" class="font-mono font-medium text-ink/80"></span> no existe en tu inventario.</p>
+        <button id="notfound-create-btn" class="mt-4 w-full rounded-xl bg-brand px-4 py-3 font-semibold text-white transition active:scale-[0.98] hover:bg-brand-dark">Crear este producto</button>
+        <button data-close class="mt-2 w-full rounded-xl py-2.5 text-sm font-medium text-ink/50 hover:bg-paper">Cancelar</button>
       </div>
-      <form id="quick-supplier-form">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="quick-supplier-rut">RUT</label>
-            <input type="text" id="quick-supplier-rut" class="uppercase-input" placeholder="Ej: 76.123.456-7" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-name">Razón Social / Nombre *</label>
-            <input type="text" id="quick-supplier-name" required class="uppercase-input" placeholder="Nombre del proveedor" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-giro">Giro</label>
-            <input type="text" id="quick-supplier-giro" placeholder="Giro o rubro" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-contact">Contacto</label>
-            <input type="text" id="quick-supplier-contact" placeholder="Persona de contacto" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-phone">Teléfono</label>
-            <input type="text" id="quick-supplier-phone" placeholder="Ej: +56 9 1234 5678" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-email">Email</label>
-            <input type="email" id="quick-supplier-email" placeholder="correo@empresa.cl" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-address">Dirección</label>
-            <input type="text" id="quick-supplier-address" placeholder="Dirección" autocomplete="off">
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeQuickSupplierModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar y Seleccionar</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- Toast Notification -->
-  <div class="toast" id="toast">
-    <span class="toast-message"></span>
-  </div>
+    <!-- ============ MODAL: FORMULARIO DE PRODUCTO ============ -->
+    <div id="product-modal" class="modal hidden">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-sheet max-h-[90vh] overflow-y-auto">
+        <div class="mx-auto mb-3 h-1.5 w-12 rounded-full bg-ink/20"></div>
+        <h3 id="product-modal-title" class="text-lg font-bold text-ink">Nuevo producto</h3>
+        <form id="product-form" class="mt-4 space-y-3">
+          <div>
+            <label for="pf-codigo" class="mb-1 block text-sm font-medium text-ink/80">Código de barra</label>
+            <input id="pf-codigo" type="text" inputmode="numeric" required
+              class="w-full rounded-xl border-ink/15 font-mono text-base focus:border-brand focus:ring-brand" placeholder="7791234567890" />
+          </div>
+          <div>
+            <label for="pf-nombre" class="mb-1 block text-sm font-medium text-ink/80">Nombre</label>
+            <input id="pf-nombre" type="text" required
+              class="w-full rounded-xl border-ink/15 text-base focus:border-brand focus:ring-brand" placeholder="Yerba 1kg" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="pf-cantidad" class="mb-1 block text-sm font-medium text-ink/80">Cantidad actual</label>
+              <input id="pf-cantidad" type="number" inputmode="numeric" min="0" required placeholder="0"
+                class="w-full rounded-xl border-ink/15 text-base focus:border-brand focus:ring-brand" />
+            </div>
+            <div>
+              <label for="pf-minimo" class="mb-1 block text-sm font-medium text-ink/80">Stock mínimo</label>
+              <input id="pf-minimo" type="number" inputmode="numeric" min="0" required placeholder="0"
+                class="w-full rounded-xl border-ink/15 text-base focus:border-brand focus:ring-brand" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="pf-costo" class="mb-1 block text-sm font-medium text-ink/80">Precio costo</label>
+              <input id="pf-costo" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"
+                class="w-full rounded-xl border-ink/15 text-base focus:border-brand focus:ring-brand" />
+            </div>
+            <div>
+              <label for="pf-venta" class="mb-1 block text-sm font-medium text-ink/80">Precio venta</label>
+              <input id="pf-venta" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"
+                class="w-full rounded-xl border-ink/15 text-base focus:border-brand focus:ring-brand" />
+            </div>
+          </div>
+          <p id="product-error" class="hidden rounded-lg bg-ink/5 px-3 py-2 text-sm text-ink ring-1 ring-ink/15" role="alert"></p>
+          <div class="flex gap-3 pt-1">
+            <button type="button" id="product-delete-btn" class="hidden rounded-xl border border-ink/30 px-4 py-3 font-semibold text-ink transition active:scale-95 hover:bg-ink hover:text-paper" aria-label="Eliminar producto">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+            <button type="submit" class="flex-1 rounded-xl bg-brand px-4 py-3 font-semibold text-white shadow-sm transition active:scale-[0.98] hover:bg-brand-dark">Guardar</button>
+          </div>
+        </form>
+        <button data-close class="mt-2 w-full rounded-xl py-2.5 text-sm font-medium text-ink/50 hover:bg-paper">Cancelar</button>
+      </div>
+    </div>
 
-  <!-- Librerias de exportacion (Excel / PDF) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <!-- ============ TOAST ============ -->
+    <div id="toast" class="pointer-events-none fixed bottom-28 left-1/2 z-50 hidden -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-medium text-white shadow-lg"></div>
 
-  <!-- Firebase SDK -->
-  <script type="module" src="app.js"></script>
-</body>
+    <script type="module" src="./js/app.js"></script>
+  </body>
 </html>
