@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Stock - Sistema de Inventario</title>
+  <title>Sistema de Existencias - Bienestar Social</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,70 +20,74 @@
             <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
             <line x1="12" y1="22.08" x2="12" y2="12"></line>
           </svg>
-          <span class="logo-text">StockControl</span>
+          <span class="logo-text">Existencias</span>
         </div>
       </div>
-      
+
+      <div class="role-box">
+        <label for="role-select">Usuario / Rol</label>
+        <select id="role-select">
+          <option value="administrador">Administrador</option>
+          <option value="bodeguero">Bodeguero</option>
+          <option value="jefe_finanzas">Jefe de Finanzas</option>
+          <option value="subjefe">Subjefe</option>
+          <option value="encargado">Encargado (Cocina/Bar/Otro)</option>
+          <option value="contador">Contador</option>
+          <option value="auditor">Auditor</option>
+        </select>
+      </div>
+
       <nav class="sidebar-nav">
         <button class="nav-item active" data-view="dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="9"></rect>
-            <rect x="14" y="3" width="7" height="5"></rect>
-            <rect x="14" y="12" width="7" height="9"></rect>
-            <rect x="3" y="16" width="7" height="5"></rect>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
           <span>Dashboard</span>
         </button>
-        <button class="nav-item" data-view="new-product">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-          </svg>
-          <span>Nuevo Producto</span>
+        <button class="nav-item" data-view="recepcion">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          <span>Recepción</span>
         </button>
-        <button class="nav-item" data-view="movements">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-            <polyline points="17 6 23 6 23 12"></polyline>
-          </svg>
-          <span>Movimientos</span>
+        <button class="nav-item" data-view="salidas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"></path><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+          <span>Salidas</span>
         </button>
-        <button class="nav-item" data-view="inventory">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <path d="M16 10a4 4 0 0 1-8 0"></path>
-          </svg>
+        <button class="nav-item" data-view="inventario">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
           <span>Inventario</span>
         </button>
-        <button class="nav-item" data-view="suppliers">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="8.5" cy="7" r="4"></circle>
-            <path d="M20 8v6M23 11h-6"></path>
-          </svg>
+        <button class="nav-item" data-view="articulos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          <span>Artículos</span>
+        </button>
+        <button class="nav-item" data-view="proveedores">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><path d="M20 8v6M23 11h-6"></path></svg>
           <span>Proveedores</span>
         </button>
-        <button class="nav-item" data-view="reports">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
+        <button class="nav-item" data-view="cuentas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span>Cuentas Contables</span>
+        </button>
+        <button class="nav-item" data-view="firmantes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <span>Firmantes</span>
+        </button>
+        <button class="nav-item" data-view="secciones">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Secciones</span>
+        </button>
+        <button class="nav-item" data-view="historial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"></path><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"></path><path d="M12 7v5l4 2"></path></svg>
+          <span>Historial / Actas</span>
+        </button>
+        <button class="nav-item" data-view="reportes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           <span>Reportes</span>
         </button>
-        <button class="nav-item" data-view="search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+        <button class="nav-item" data-view="buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <span>Buscar</span>
         </button>
       </nav>
-      
+
       <div class="sidebar-footer">
         <div class="connection-status" id="connection-status">
           <span class="status-dot"></span>
@@ -95,425 +99,237 @@
     <!-- Mobile Header -->
     <header class="mobile-header">
       <button class="menu-toggle" id="menu-toggle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
-      <span class="mobile-title">StockControl</span>
+      <span class="mobile-title">Existencias</span>
     </header>
 
     <!-- Main Content -->
     <main class="main-content">
-      <!-- Dashboard View -->
+
+      <!-- ========== DASHBOARD ========== -->
       <section class="view active" id="dashboard-view">
         <div class="view-header">
-          <h1>Dashboard - prueba</h1>
-          <p class="view-subtitle">Resumen general del inventario</p>
+          <h1>Dashboard</h1>
+          <p class="view-subtitle">Resumen general de existencias</p>
         </div>
-        
+
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <path d="M16 10a4 4 0 0 1-8 0"></path>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-productos" value=0></span>
-              <span class="stat-label">Total Productos</span>
-            </div>
+            <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+            <div class="stat-info"><span class="stat-value" id="stat-articulos">0</span><span class="stat-label">Artículos</span></div>
           </div>
-          
           <div class="stat-card">
-            <div class="stat-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                <polyline points="17 6 23 6 23 12"></polyline>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-movements">0</span>
-              <span class="stat-label">Total Movimientos</span>
-            </div>
+            <div class="stat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+            <div class="stat-info"><span class="stat-value" id="stat-valor">$0</span><span class="stat-label">Saldo Valorizado</span></div>
           </div>
-          
           <div class="stat-card">
-            <div class="stat-icon purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="1" x2="12" y2="23"></line>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-value">$0</span>
-              <span class="stat-label">Valor Total</span>
-            </div>
+            <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="14 2 14 8 20 8"></polyline><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
+            <div class="stat-info"><span class="stat-value" id="stat-recepciones">0</span><span class="stat-label">Recepciones (mes)</span></div>
           </div>
-          
           <div class="stat-card">
-            <div class="stat-icon yellow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="low-stock">0</span>
-              <span class="stat-label">Stock Bajo</span>
-            </div>
+            <div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"></path><rect x="1" y="3" width="22" height="5"></rect></svg></div>
+            <div class="stat-info"><span class="stat-value" id="stat-costo-salidas">$0</span><span class="stat-label">Costo Salidas (mes)</span></div>
           </div>
-          
           <div class="stat-card">
-            <div class="stat-icon red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value" id="out-of-stock">0</span>
-              <span class="stat-label">Sin Stock</span>
-            </div>
+            <div class="stat-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+            <div class="stat-info"><span class="stat-value" id="stat-critico">0</span><span class="stat-label">Stock Crítico</span></div>
           </div>
         </div>
 
         <div class="dashboard-grid">
           <div class="card">
-            <div class="card-header">
-              <h3>Movimientos Recientes</h3>
-            </div>
-            <div class="card-content">
-              <div class="recent-list" id="recent-movements"></div>
-            </div>
+            <div class="card-header"><h3>Movimientos Recientes</h3></div>
+            <div class="card-content"><div class="recent-list" id="recent-movements"></div></div>
           </div>
-          
           <div class="card">
-            <div class="card-header">
-              <h3>Alertas de Stock</h3>
-            </div>
-            <div class="card-content">
-              <div class="alert-list" id="stock-alerts"></div>
-            </div>
+            <div class="card-header"><h3>Alertas de Stock Crítico</h3></div>
+            <div class="card-content"><div class="alert-list" id="stock-alerts"></div></div>
           </div>
         </div>
       </section>
 
-      <!-- New Product View -->
-      <section class="view" id="new-product-view">
+      <!-- ========== RECEPCIÓN DE FACTURA ========== -->
+      <section class="view" id="recepcion-view">
         <div class="view-header">
-          <h1>Nuevo Producto</h1>
-          <p class="view-subtitle">Registrar un nuevo producto en el inventario</p>
+          <h1>Recepción de Factura</h1>
+          <p class="view-subtitle">Ingreso de existencias a partir de una factura</p>
         </div>
-        
+
         <div class="card form-card">
-          <form id="formulario-producto">
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="codigo-producto">Codigo *</label>
-                <input type="text" id="codigo-producto" required placeholder="Ej: PROD-001" class="uppercase-input">
+          <h3>Datos de la factura</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="rec-prov-rut">RUT Proveedor *</label>
+              <div class="autocomplete-wrapper">
+                <input type="text" id="rec-prov-rut" class="uppercase-input" placeholder="Escriba RUT o razón social..." autocomplete="off">
+                <div class="autocomplete-list" id="rec-prov-list"></div>
               </div>
-              
-              <div class="form-group">
-                <label for="nombre-producto">Nombre *</label>
-                <input type="text" id="nombre-producto" required placeholder="Nombre del producto" class="uppercase-input">
-              </div>
-              
-              <div class="form-group" id="campo-unidad-medida"></div>
-              
-              <div class="form-group" id="campo-tipo-producto"></div>
-
-              <div class="form-group" id="campo-almacen"></div>
-
-
-              <div class="form-group">
-                <label for="stock-producto">Stock Inicial *</label>
-                <input type="number" id="stock-producto" min="0" step="0.01" placeholder="0" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="stock-min-producto">Stock Minimo * (Alerta)</label>
-                <input type="number" id="stock-min-producto" min="0" step="0.01" placeholder="20" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="precio-producto">Precio Unitario *</label>
-                <input type="number" id="precio-producto" min="0" step="0.01" placeholder="0" required>
-              </div>
-              
-
+              <input type="hidden" id="rec-prov-id">
+              <small class="field-hint" id="rec-prov-info"></small>
             </div>
-            
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" onclick="clearProductForm()">Limpiar</button>
-              <button type="submit" class="btn btn-primary">Guardar Producto</button>
+            <div class="form-group">
+              <label for="rec-razon">Razón Social</label>
+              <input type="text" id="rec-razon" placeholder="Se completa automáticamente" readonly>
             </div>
-          </form>
+            <div class="form-group">
+              <label for="rec-nfactura">N° Factura / Guía *</label>
+              <input type="text" id="rec-nfactura" class="uppercase-input" placeholder="Ej: F-27872" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="rec-fecha-factura">Fecha de la factura *</label>
+              <input type="date" id="rec-fecha-factura">
+            </div>
+            <div class="form-group">
+              <label for="rec-orden">N° Orden de compra / Carta orden</label>
+              <input type="text" id="rec-orden" class="uppercase-input" placeholder="Ej: 3085-761-CM25" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="rec-fecha-recepcion">Fecha de recepción e ingreso *</label>
+              <input type="date" id="rec-fecha-recepcion">
+            </div>
+          </div>
+
+          <h3 style="margin-top:1.5rem;">Detalle de artículos</h3>
+          <div class="line-entry">
+            <div class="form-group grow">
+              <label for="rec-art">Artículo (buscar por nombre o código) *</label>
+              <div class="autocomplete-wrapper">
+                <input type="text" id="rec-art" class="uppercase-input" placeholder="Escriba el nombre..." autocomplete="off">
+                <div class="autocomplete-list" id="rec-art-list"></div>
+              </div>
+              <input type="hidden" id="rec-art-id">
+              <small class="field-hint" id="rec-art-info"></small>
+            </div>
+            <div class="form-group">
+              <label for="rec-cant">Cantidad *</label>
+              <input type="number" id="rec-cant" min="0" step="0.01" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="rec-precio">Precio unit. (sin IVA) *</label>
+              <input type="number" id="rec-precio" min="0" step="0.01" placeholder="0">
+            </div>
+            <div class="form-group line-add">
+              <label>&nbsp;</label>
+              <button type="button" class="btn btn-primary" id="rec-add-line">+ Agregar</button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr><th>N°</th><th>Código</th><th>Artículo</th><th>Cantidad</th><th>Unidad</th><th>Precio</th><th>Total</th><th></th></tr>
+              </thead>
+              <tbody id="rec-items"></tbody>
+            </table>
+          </div>
+
+          <div class="totales-bar">
+            <div class="totales-row"><span>Total Neto</span><strong id="rec-neto">$0</strong></div>
+            <div class="totales-row">
+              <span>IVA (19%)</span>
+              <input type="number" id="rec-iva" min="0" step="0.01" class="iva-input" placeholder="0">
+            </div>
+            <div class="totales-row total-final"><span>Total Factura</span><strong id="rec-total">$0</strong></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="rec-clear">Limpiar</button>
+            <button type="button" class="btn btn-primary" id="rec-save">Guardar Recepción</button>
+          </div>
+        </div>
+
+        <div class="card acta-panel" id="rec-acta-panel" style="display:none;">
+          <div class="card-content">
+            <p class="acta-ok">Recepción guardada. Acta de Recepción N° <strong id="rec-last-num"></strong></p>
+            <div class="filter-group">
+              <button class="btn btn-primary" id="rec-print-recepcion">Acta de Recepción (PDF)</button>
+              <button class="btn btn-secondary" id="rec-print-ingreso">Acta de Ingreso a Pañol (PDF)</button>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- Movements View -->
-      <section class="view" id="movements-view">
+      <!-- ========== SALIDAS ========== -->
+      <section class="view" id="salidas-view">
         <div class="view-header">
-          <h1>Movimientos</h1>
-          <p class="view-subtitle">Gestionar entradas, salidas y transferencias</p>
+          <h1>Salida de Existencias</h1>
+          <p class="view-subtitle">Acta de Salida de Pañol (costo por promedio ponderado)</p>
         </div>
-        
-        <div class="tabs">
-          <button class="tab active" data-tab="entry">Entrada</button>
-          <button class="tab" data-tab="exit">Salida</button>
-          <button class="tab" data-tab="transfer">Transferencia</button>
-          <button class="tab" data-tab="history">Historial</button>
-        </div>
-        
-        <!-- Entry Tab -->
-        <div class="tab-content active" id="entry-tab">
-          <div class="card form-card">
-            <h3>Registrar Entrada</h3>
-            <form id="entry-form">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="entry-product">Codigo Producto *</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="entry-product" required placeholder="Escriba el codigo..." class="uppercase-input" autocomplete="off">
-                    <div class="autocomplete-list" id="entry-product-list"></div>
-                  </div>
-                  <input type="hidden" id="entry-product-id">
-                </div>
-                <div class="form-group">
-                  <label for="entry-quantity">Cantidad *</label>
-                  <input type="number" id="entry-quantity" min="0" step="0.01" required placeholder="Cantidad">
-                </div>
-                <div class="form-group">
-                  <label for="entry-warehouse">Almacen Destino</label>
-                  <select id="entry-warehouse">
-                    <option value="0">Principal</option>
-                    <option value="1">Secundario</option>
-                    <option value="2">Bodega</option>
-                  </select>
-                </div>
-                <div id="campo-motivo"></div>
-                <div class="form-group">
-                  <label for="entry-proveedor-rut">Proveedor (RUT)</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="entry-proveedor-rut" placeholder="Escriba el RUT o nombre..." class="uppercase-input" autocomplete="off">
-                    <div class="autocomplete-list" id="entry-proveedor-list"></div>
-                  </div>
-                  <input type="hidden" id="entry-proveedor-id">
-                  <small class="field-hint" id="entry-proveedor-info"></small>
-                </div>
-                <div class="form-group">
-                  <label for="entry-proveedor-nombre">Razon Social</label>
-                  <input type="text" id="entry-proveedor-nombre" placeholder="Se completa automaticamente" readonly>
-                </div>
-                <div class="form-group">
-                  <label for="entry-doc-type">Tipo de Documento</label>
-                  <select id="entry-doc-type">
-                    <option value="">Seleccionar...</option>
-                    <option value="FACTURA">Factura</option>
-                    <option value="BOLETA">Boleta</option>
-                    <option value="GUIA DE DESPACHO">Guía de Despacho</option>
-                    <option value="ORDEN DE COMPRA">Orden de Compra</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="entry-doc-number">N° Documento</label>
-                  <input type="text" id="entry-doc-number" placeholder="Ej: 0012345" class="uppercase-input" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="entry-doc-date">Fecha de Recepción</label>
-                  <input type="date" id="entry-doc-date">
-                </div>
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Registrar Entrada</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        
-        <!-- Exit Tab -->
-        <div class="tab-content" id="exit-tab">
-          <div class="card form-card">
-            <h3>Registrar Salida</h3>
-            <form id="exit-form">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="exit-product">Codigo Producto *</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="exit-product" required placeholder="Escriba el codigo..." class="uppercase-input" autocomplete="off">
-                    <div class="autocomplete-list" id="exit-product-list"></div>
-                  </div>
-                  <input type="hidden" id="exit-product-id">
-                </div>
-                <div class="form-group">
-                  <label for="exit-quantity">Cantidad *</label>
-                  <input type="number" id="exit-quantity" min="0" step="0.01" required placeholder="Cantidad">
-                </div>
-                <div class="form-group">
-                  <label for="exit-warehouse">Almacen Origen</label>
-                  <select id="exit-warehouse">
-                    <option value="0">Principal</option>
-                    <option value="1">Secundario</option>
-                    <option value="2">Bodega</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="exit-reason">Motivo *</label>
-                  <select id="exit-reason" required>
-                    <option value="">Seleccionar motivo...</option>
-                    <option value="VENTA">Venta</option>
-                    <option value="CONSUMO INTERNO">Consumo Interno</option>
-                    <option value="MERMA">Merma</option>
-                    <option value="ROBO">Robo</option>
-                    <option value="DETERIORO">Deterioro</option>
-                    <option value="VENCIMIENTO">Vencimiento</option>
-                    <option value="MUESTRA">Muestra</option>
-                    <option value="DONACION">Donacion</option>
-                    <option value="AJUSTE INVENTARIO">Ajuste de Inventario</option>
-                    <option value="TRANSFERENCIA SALIDA">Transferencia Salida</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="exit-empresa">Cliente / Empresa</label>
-                  <input type="text" id="exit-empresa" placeholder="Nombre del cliente o empresa" class="uppercase-input" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="exit-doc-type">Tipo de Documento</label>
-                  <select id="exit-doc-type">
-                    <option value="">Seleccionar...</option>
-                    <option value="FACTURA">Factura</option>
-                    <option value="BOLETA">Boleta</option>
-                    <option value="GUIA DE DESPACHO">Guía de Despacho</option>
-                    <option value="NOTA DE VENTA">Nota de Venta</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="exit-doc-number">N° Documento</label>
-                  <input type="text" id="exit-doc-number" placeholder="Ej: 0012345" class="uppercase-input" autocomplete="off">
-                </div>
-                <div class="form-group">
-                  <label for="exit-doc-date">Fecha de Emisión</label>
-                  <input type="date" id="exit-doc-date">
-                </div>
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Registrar Salida</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        
-        <!-- Transfer Tab -->
-        <div class="tab-content" id="transfer-tab">
-          <div class="card form-card">
-            <h3>Registrar Transferencia</h3>
-            <form id="transfer-form">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="transfer-product">Codigo Producto *</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="transfer-product" required placeholder="Escriba el codigo..." class="uppercase-input" autocomplete="off">
-                    <div class="autocomplete-list" id="transfer-product-list"></div>
-                  </div>
-                  <input type="hidden" id="transfer-product-id">
-                </div>
-                <div class="form-group">
-                  <label for="transfer-quantity">Cantidad *</label>
-                  <input type="number" id="transfer-quantity" min="1" required placeholder="Cantidad">
-                </div>
-                <div class="form-group">
-                  <label for="transfer-from">Almacen Origen *</label>
-                  <select id="transfer-from" required>
-                    <option value="0">Principal</option>
-                    <option value="1">Secundario</option>
-                    <option value="2">Bodega</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="transfer-to">Almacen Destino *</label>
-                  <select id="transfer-to" required>
-                    <option value="1">Secundario</option>
-                    <option value="0">Principal</option>
-                    <option value="2">Bodega</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Registrar Transferencia</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        
-        <!-- History Tab -->
-        <div class="tab-content" id="history-tab">
-          <div class="card">
-            <div class="card-header">
-              <h3>Historial de Movimientos</h3>
-              <div class="filter-group">
-                <select id="history-filter">
-                  <option value="all">Todos</option>
-                  <option value="entrada">Entradas</option>
-                  <option value="salida">Salidas</option>
-                  <option value="transferencia">Transferencias</option>
-                </select>
-              </div>
+
+        <div class="card form-card">
+          <h3>Datos de la salida</h3>
+          <div class="form-grid">
+            <div class="form-group" id="sal-seccion-wrap"></div>
+            <div class="form-group">
+              <label for="sal-solicitante">Solicitante</label>
+              <input type="text" id="sal-solicitante" class="uppercase-input" placeholder="Nombre de quien solicita" autocomplete="off">
             </div>
-            <div class="card-content">
-              <div class="table-container">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Fecha</th>
-                      <th>Tipo</th>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Almacen</th>
-                      <th>Empresa</th>
-                      <th>Documento</th>
-                      <th>Motivo</th>
-                    </tr>
-                  </thead>
-                  <tbody id="movements-table"></tbody>
-                </table>
-              </div>
+            <div class="form-group">
+              <label for="sal-fecha">Fecha de salida *</label>
+              <input type="date" id="sal-fecha">
             </div>
+          </div>
+
+          <h3 style="margin-top:1.5rem;">Detalle de artículos</h3>
+          <div class="line-entry">
+            <div class="form-group grow">
+              <label for="sal-art">Artículo *</label>
+              <div class="autocomplete-wrapper">
+                <input type="text" id="sal-art" class="uppercase-input" placeholder="Escriba el nombre..." autocomplete="off">
+                <div class="autocomplete-list" id="sal-art-list"></div>
+              </div>
+              <input type="hidden" id="sal-art-id">
+              <small class="field-hint" id="sal-art-info"></small>
+            </div>
+            <div class="form-group">
+              <label for="sal-cant">Cantidad *</label>
+              <input type="number" id="sal-cant" min="0" step="0.01" placeholder="0">
+            </div>
+            <div class="form-group line-add">
+              <label>&nbsp;</label>
+              <button type="button" class="btn btn-primary" id="sal-add-line">+ Agregar</button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr><th>N°</th><th>Código</th><th>Artículo</th><th>Cantidad</th><th>Unidad</th><th>Costo unit.</th><th>Costo total</th><th></th></tr>
+              </thead>
+              <tbody id="sal-items"></tbody>
+            </table>
+          </div>
+
+          <div class="totales-bar">
+            <div class="totales-row total-final"><span>Costo Total</span><strong id="sal-total">$0</strong></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="sal-clear">Limpiar</button>
+            <button type="button" class="btn btn-primary" id="sal-save">Guardar Salida</button>
+          </div>
+        </div>
+
+        <div class="card acta-panel" id="sal-acta-panel" style="display:none;">
+          <div class="card-content">
+            <p class="acta-ok">Salida guardada. Acta de Salida N° <strong id="sal-last-num"></strong></p>
+            <button class="btn btn-primary" id="sal-print">Acta de Salida de Pañol (PDF)</button>
           </div>
         </div>
       </section>
 
-      <!-- Inventory View -->
-      <section class="view" id="inventory-view">
+      <!-- ========== INVENTARIO ========== -->
+      <section class="view" id="inventario-view">
         <div class="view-header">
           <h1>Inventario</h1>
-          <p class="view-subtitle">Lista completa de productos</p>
+          <p class="view-subtitle">Existencias valorizadas al costo promedio</p>
         </div>
-        
         <div class="card">
           <div class="card-header">
             <div class="filter-group">
-              <select id="inventory-group-filter">
-                <option value="all">Todos los grupos</option>
-                <option value="0">Electronica</option>
-                <option value="1">Alimentos</option>
-                <option value="2">Bebidas</option>
-                <option value="3">Limpieza</option>
-                <option value="4">Papeleria</option>
-                <option value="5">Herramientas</option>
-                <option value="6">Ropa</option>
-                <option value="7">Hogar</option>
-                <option value="8">Otros</option>
-              </select>
-              <select id="inventory-status-filter">
+              <select id="inv-cuenta-filter"><option value="all">Todas las cuentas</option></select>
+              <select id="inv-status-filter">
                 <option value="all">Todos los estados</option>
                 <option value="available">Disponible</option>
                 <option value="low">Stock Bajo</option>
@@ -525,19 +341,7 @@
             <div class="table-container">
               <table class="data-table">
                 <thead>
-                  <tr>
-                    <th>Código</th>
-                    <th>Producto</th>
-                    <th>Tipo</th>
-                    <th>Stock</th>
-                    <th>Unidad</th>
-                    <th>Precio Sin IVA</th>
-                    <th>Precio Con IVA</th>
-                    <th>Total Sin IVA</th>
-                    <th>Total Con IVA</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
+                  <tr><th>Código</th><th>Artículo</th><th>Cuenta gasto</th><th>Stock</th><th>Unidad</th><th>Stock mín.</th><th>Costo prom.</th><th>Saldo valorizado</th><th>Estado</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="inventory-table"></tbody>
               </table>
@@ -546,160 +350,273 @@
         </div>
       </section>
 
-      <!-- Suppliers View -->
-      <section class="view" id="suppliers-view">
+      <!-- ========== ARTÍCULOS ========== -->
+      <section class="view" id="articulos-view">
         <div class="view-header">
-          <h1>Proveedores</h1>
-          <p class="view-subtitle">Base de datos de proveedores</p>
+          <h1>Artículos</h1>
+          <p class="view-subtitle">Base de datos de artículos (código automático)</p>
         </div>
-
         <div class="card form-card">
-          <h3>Nuevo Proveedor</h3>
-          <form id="supplier-form">
+          <h3>Nuevo artículo</h3>
+          <form id="articulo-form">
             <div class="form-grid">
               <div class="form-group">
-                <label for="supplier-rut">RUT</label>
-                <input type="text" id="supplier-rut" placeholder="Ej: 76.123.456-7" class="uppercase-input" autocomplete="off">
+                <label for="art-codigo">Código (automático)</label>
+                <input type="text" id="art-codigo" placeholder="Se generará automáticamente" readonly>
               </div>
               <div class="form-group">
-                <label for="supplier-name">Razón Social / Nombre *</label>
-                <input type="text" id="supplier-name" required placeholder="Nombre del proveedor" class="uppercase-input" autocomplete="off">
+                <label for="art-nombre">Nombre *</label>
+                <input type="text" id="art-nombre" required class="uppercase-input" placeholder="Nombre del artículo" autocomplete="off">
               </div>
               <div class="form-group">
-                <label for="supplier-giro">Giro</label>
-                <input type="text" id="supplier-giro" placeholder="Giro o rubro" autocomplete="off">
+                <label for="art-unidad">Unidad de medida *</label>
+                <select id="art-unidad" required></select>
               </div>
               <div class="form-group">
-                <label for="supplier-contact">Contacto</label>
-                <input type="text" id="supplier-contact" placeholder="Persona de contacto" autocomplete="off">
+                <label for="art-stockmin">Stock mínimo *</label>
+                <input type="number" id="art-stockmin" min="0" step="0.01" required placeholder="0">
               </div>
-              <div class="form-group">
-                <label for="supplier-phone">Teléfono</label>
-                <input type="text" id="supplier-phone" placeholder="Ej: +56 9 1234 5678" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="supplier-email">Email</label>
-                <input type="email" id="supplier-email" placeholder="correo@empresa.cl" autocomplete="off">
-              </div>
-              <div class="form-group">
-                <label for="supplier-address">Dirección</label>
-                <input type="text" id="supplier-address" placeholder="Dirección" autocomplete="off">
+              <div class="form-group full">
+                <label for="art-cuenta">Cuenta de gasto asociada *</label>
+                <select id="art-cuenta" required><option value="">Seleccionar...</option></select>
               </div>
             </div>
             <div class="form-actions">
-              <button type="button" class="btn btn-secondary" onclick="document.getElementById('supplier-form').reset()">Limpiar</button>
-              <button type="submit" class="btn btn-primary">Guardar Proveedor</button>
+              <button type="button" class="btn btn-secondary" onclick="document.getElementById('articulo-form').reset()">Limpiar</button>
+              <button type="submit" class="btn btn-primary">Guardar Artículo</button>
             </div>
           </form>
         </div>
 
         <div class="card">
-          <div class="card-header">
-            <h3>Listado de Proveedores</h3>
-            <span class="result-count" id="supplier-count">0 proveedores</span>
-          </div>
+          <div class="card-header"><h3>Listado de artículos</h3><span class="result-count" id="art-count">0 artículos</span></div>
           <div class="card-content">
             <div class="table-container">
               <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>RUT</th>
-                    <th>Razón Social</th>
-                    <th>Giro</th>
-                    <th>Contacto</th>
-                    <th>Teléfono</th>
-                    <th>Email</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="suppliers-table"></tbody>
+                <thead><tr><th>Código</th><th>Nombre</th><th>Unidad</th><th>Stock mín.</th><th>Cuenta</th><th>Acciones</th></tr></thead>
+                <tbody id="articulos-table"></tbody>
               </table>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Reports View -->
-      <section class="view" id="reports-view">
+      <!-- ========== PROVEEDORES ========== -->
+      <section class="view" id="proveedores-view">
+        <div class="view-header">
+          <h1>Proveedores</h1>
+          <p class="view-subtitle">Base de datos de proveedores</p>
+        </div>
+        <div class="card form-card">
+          <h3>Nuevo proveedor</h3>
+          <form id="proveedor-form">
+            <div class="form-grid">
+              <div class="form-group"><label for="prov-rut">RUT *</label><input type="text" id="prov-rut" class="uppercase-input" placeholder="Ej: 76.123.456-7" autocomplete="off"></div>
+              <div class="form-group"><label for="prov-razon">Razón Social *</label><input type="text" id="prov-razon" required class="uppercase-input" placeholder="Razón social" autocomplete="off"></div>
+              <div class="form-group"><label for="prov-direccion">Dirección</label><input type="text" id="prov-direccion" placeholder="Dirección" autocomplete="off"></div>
+              <div class="form-group"><label for="prov-telefono">Teléfono de contacto</label><input type="text" id="prov-telefono" placeholder="Ej: +56 9 1234 5678" autocomplete="off"></div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="document.getElementById('proveedor-form').reset()">Limpiar</button>
+              <button type="submit" class="btn btn-primary">Guardar Proveedor</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Listado de proveedores</h3><span class="result-count" id="prov-count">0 proveedores</span></div>
+          <div class="card-content">
+            <div class="table-container">
+              <table class="data-table">
+                <thead><tr><th>RUT</th><th>Razón Social</th><th>Dirección</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+                <tbody id="proveedores-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CUENTAS CONTABLES ========== -->
+      <section class="view" id="cuentas-view">
+        <div class="view-header">
+          <h1>Cuentas Contables</h1>
+          <p class="view-subtitle">Cuentas de gasto asociadas a los artículos</p>
+        </div>
+        <div class="card form-card">
+          <h3>Nueva cuenta</h3>
+          <form id="cuenta-form">
+            <div class="form-grid">
+              <div class="form-group"><label for="cuenta-codigo">Código de cuenta *</label><input type="text" id="cuenta-codigo" required placeholder="Ej: 53204070000000" autocomplete="off"></div>
+              <div class="form-group"><label for="cuenta-nombre">Nombre de cuenta *</label><input type="text" id="cuenta-nombre" required placeholder="Ej: Mat. y Utiles de Aseo" autocomplete="off"></div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="document.getElementById('cuenta-form').reset()">Limpiar</button>
+              <button type="submit" class="btn btn-primary">Guardar Cuenta</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Listado de cuentas</h3><span class="result-count" id="cuenta-count">0 cuentas</span></div>
+          <div class="card-content">
+            <div class="table-container">
+              <table class="data-table">
+                <thead><tr><th>Código</th><th>Nombre</th><th>Acciones</th></tr></thead>
+                <tbody id="cuentas-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== FIRMANTES ========== -->
+      <section class="view" id="firmantes-view">
+        <div class="view-header">
+          <h1>Firmantes</h1>
+          <p class="view-subtitle">Firmas que aparecen en las actas</p>
+        </div>
+        <div class="card form-card">
+          <h3>Nuevo firmante</h3>
+          <form id="firmante-form">
+            <div class="form-grid">
+              <div class="form-group"><label for="firm-nombre">Nombre *</label><input type="text" id="firm-nombre" required class="uppercase-input" placeholder="Nombre completo" autocomplete="off"></div>
+              <div class="form-group"><label for="firm-grado">Grado</label><input type="text" id="firm-grado" class="uppercase-input" placeholder="Ej: CAPITÁN DE CORBETA" autocomplete="off"></div>
+              <div class="form-group"><label for="firm-cargo">Cargo</label><input type="text" id="firm-cargo" class="uppercase-input" placeholder="Ej: JEFE DEPTO. ABASTECIMIENTO" autocomplete="off"></div>
+              <div class="form-group"><label for="firm-rut">RUT</label><input type="text" id="firm-rut" class="uppercase-input" placeholder="Ej: 15.071.331-5" autocomplete="off"></div>
+              <div class="form-group"><label for="firm-orden">Orden</label><input type="number" id="firm-orden" min="1" step="1" placeholder="1"></div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="document.getElementById('firmante-form').reset()">Limpiar</button>
+              <button type="submit" class="btn btn-primary">Guardar Firmante</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Listado de firmantes</h3><span class="result-count" id="firm-count">0 firmantes</span></div>
+          <div class="card-content">
+            <div class="table-container">
+              <table class="data-table">
+                <thead><tr><th>Orden</th><th>Nombre</th><th>Grado</th><th>Cargo</th><th>RUT</th><th>Acciones</th></tr></thead>
+                <tbody id="firmantes-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECCIONES ========== -->
+      <section class="view" id="secciones-view">
+        <div class="view-header">
+          <h1>Secciones</h1>
+          <p class="view-subtitle">Cocina, bar, panadería, lavandería, etc.</p>
+        </div>
+        <div class="card form-card">
+          <h3>Nueva sección</h3>
+          <form id="seccion-form">
+            <div class="form-grid">
+              <div class="form-group full"><label for="seccion-nombre">Nombre *</label><input type="text" id="seccion-nombre" required class="uppercase-input" placeholder="Ej: COCINA" autocomplete="off"></div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="document.getElementById('seccion-form').reset()">Limpiar</button>
+              <button type="submit" class="btn btn-primary">Guardar Sección</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Listado de secciones</h3><span class="result-count" id="seccion-count">0 secciones</span></div>
+          <div class="card-content">
+            <div class="table-container">
+              <table class="data-table">
+                <thead><tr><th>Nombre</th><th>Acciones</th></tr></thead>
+                <tbody id="secciones-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== HISTORIAL / ACTAS ========== -->
+      <section class="view" id="historial-view">
+        <div class="view-header">
+          <h1>Historial / Actas</h1>
+          <p class="view-subtitle">Reimprimir y anular actas</p>
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-htab="recepciones">Recepciones</button>
+          <button class="tab" data-htab="salidas">Salidas</button>
+        </div>
+        <div class="tab-content active" id="htab-recepciones">
+          <div class="card"><div class="card-content"><div class="table-container">
+            <table class="data-table">
+              <thead><tr><th>N° Acta</th><th>Fecha</th><th>Proveedor</th><th>Factura</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="hist-recepciones"></tbody>
+            </table>
+          </div></div></div>
+        </div>
+        <div class="tab-content" id="htab-salidas">
+          <div class="card"><div class="card-content"><div class="table-container">
+            <table class="data-table">
+              <thead><tr><th>N° Acta</th><th>Fecha</th><th>Sección</th><th>Solicitante</th><th>Costo</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="hist-salidas"></tbody>
+            </table>
+          </div></div></div>
+        </div>
+      </section>
+
+      <!-- ========== REPORTES ========== -->
+      <section class="view" id="reportes-view">
         <div class="view-header">
           <h1>Reportes</h1>
-          <p class="view-subtitle">Generar reportes del inventario</p>
+          <p class="view-subtitle">Costos, mayor de existencias y saldos</p>
         </div>
-        
         <div class="reports-grid">
           <div class="card report-card">
-            <div class="report-icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-              </svg>
-            </div>
-            <h3>Inventario Actual</h3>
-            <p>Reporte completo del stock con valores</p>
-            <button class="btn btn-primary" onclick="generateInventoryReport()">Generar Reporte</button>
+            <div class="report-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg></div>
+            <h3>Inventario valorizado</h3>
+            <p>Existencias con costo promedio y saldo</p>
+            <button class="btn btn-primary" onclick="reporteInventario()">Generar</button>
           </div>
-          
           <div class="card report-card">
-            <div class="report-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                <polyline points="17 6 23 6 23 12"></polyline>
-              </svg>
+            <div class="report-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
+            <h3>Mayor por artículo</h3>
+            <p>Entradas, salidas y saldo valorizado</p>
+            <div class="form-group" style="text-align:left;margin-bottom:1rem;">
+              <label for="rep-art">Artículo</label>
+              <select id="rep-art"><option value="all">Todos</option></select>
             </div>
-            <h3>Movimientos por Fecha</h3>
-            <p>Filtrar movimientos por rango de fechas</p>
-            <div class="date-range">
-              <input type="date" id="report-date-from">
-              <span>a</span>
-              <input type="date" id="report-date-to">
-            </div>
-            <button class="btn btn-primary" onclick="generateMovementsReport()">Generar Reporte</button>
+            <div class="date-range"><input type="date" id="rep-mayor-from"><span>a</span><input type="date" id="rep-mayor-to"></div>
+            <button class="btn btn-primary" onclick="reporteMayor()">Generar</button>
           </div>
-          
           <div class="card report-card">
-            <div class="report-icon yellow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-            </div>
-            <h3>Stock Bajo</h3>
-            <p>Productos que necesitan reposicion</p>
-            <button class="btn btn-primary" onclick="generateLowStockReport()">Generar Reporte</button>
+            <div class="report-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+            <h3>Costos por sección</h3>
+            <p>Costo de salidas agrupado por sección</p>
+            <div class="date-range"><input type="date" id="rep-sec-from"><span>a</span><input type="date" id="rep-sec-to"></div>
+            <button class="btn btn-primary" onclick="reporteCostosSeccion()">Generar</button>
           </div>
-
           <div class="card report-card">
-            <div class="report-icon purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-              </svg>
-            </div>
-            <h3>Documentación Ingresada</h3>
-            <p>Facturas, boletas y guías de entradas y salidas</p>
-            <div class="form-group" style="margin-bottom: 1rem; text-align: left;">
-              <label for="doc-type-filter">Tipo de movimiento</label>
-              <select id="doc-type-filter">
-                <option value="all">Entradas y Salidas</option>
-                <option value="entrada">Solo Entradas</option>
-                <option value="salida">Solo Salidas</option>
-              </select>
-            </div>
-            <div class="date-range">
-              <input type="date" id="doc-date-from">
-              <span>a</span>
-              <input type="date" id="doc-date-to">
-            </div>
-            <button class="btn btn-primary" onclick="generateDocumentationReport()">Generar Reporte</button>
+            <div class="report-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
+            <h3>Costos por artículo</h3>
+            <p>Costo de salidas agrupado por artículo</p>
+            <div class="date-range"><input type="date" id="rep-cart-from"><span>a</span><input type="date" id="rep-cart-to"></div>
+            <button class="btn btn-primary" onclick="reporteCostosArticulo()">Generar</button>
+          </div>
+          <div class="card report-card">
+            <div class="report-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line></svg></div>
+            <h3>Stock crítico</h3>
+            <p>Artículos bajo el mínimo</p>
+            <button class="btn btn-primary" onclick="reporteCritico()">Generar</button>
+          </div>
+          <div class="card report-card">
+            <div class="report-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+            <h3>Movimientos por fecha</h3>
+            <p>Entradas y salidas en un rango</p>
+            <div class="date-range"><input type="date" id="rep-mov-from"><span>a</span><input type="date" id="rep-mov-to"></div>
+            <button class="btn btn-primary" onclick="reporteMovimientos()">Generar</button>
           </div>
         </div>
-        
-        <div class="card" id="report-result" style="display: none;">
+
+        <div class="card" id="report-result" style="display:none;">
           <div class="card-header">
-            <h3 id="report-title">Resultado del Reporte</h3>
+            <h3 id="report-title">Resultado</h3>
             <div class="filter-group">
               <button class="btn btn-secondary" onclick="exportReportExcel()">Excel</button>
               <button class="btn btn-secondary" onclick="exportReportPDF()">PDF</button>
@@ -707,265 +624,155 @@
               <button class="btn btn-secondary" onclick="exportReportCSV()">CSV</button>
             </div>
           </div>
-          <div class="card-content">
-            <div class="table-container">
-              <table class="data-table">
-                <thead id="report-thead"></thead>
-                <tbody id="report-tbody"></tbody>
-              </table>
-            </div>
-          </div>
+          <div class="card-content"><div class="table-container">
+            <table class="data-table"><thead id="report-thead"></thead><tbody id="report-tbody"></tbody></table>
+          </div></div>
         </div>
       </section>
 
-      <!-- Search View -->
-      <section class="view" id="search-view">
+      <!-- ========== BUSCAR ========== -->
+      <section class="view" id="buscar-view">
         <div class="view-header">
           <h1>Buscar</h1>
-          <p class="view-subtitle">Busqueda global en productos y movimientos</p>
+          <p class="view-subtitle">Búsqueda global</p>
         </div>
-        
         <div class="search-container">
           <div class="search-input-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="global-search" placeholder="Buscar por nombre, codigo, grupo o motivo...">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="global-search" placeholder="Buscar por artículo, código o cuenta...">
           </div>
         </div>
-        
         <div class="search-results">
           <div class="card">
-            <div class="card-header">
-              <h3>Productos Encontrados</h3>
-              <span class="result-count" id="product-count">0 resultados</span>
-            </div>
-            <div class="card-content">
-              <div class="table-container">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Codigo</th>
-                      <th>Nombre</th>
-                      <th>Grupo</th>
-                      <th>Stock</th>
-                      <th>Precio</th>
-                    </tr>
-                  </thead>
-                  <tbody id="search-products"></tbody>
-                </table>
-              </div>
-            </div>
+            <div class="card-header"><h3>Artículos</h3><span class="result-count" id="search-art-count">0 resultados</span></div>
+            <div class="card-content"><div class="table-container">
+              <table class="data-table"><thead><tr><th>Código</th><th>Nombre</th><th>Cuenta</th><th>Stock</th><th>Costo prom.</th></tr></thead><tbody id="search-articulos"></tbody></table>
+            </div></div>
           </div>
-          
           <div class="card">
-            <div class="card-header">
-              <h3>Movimientos Encontrados</h3>
-              <span class="result-count" id="movement-count">0 resultados</span>
-            </div>
-            <div class="card-content">
-              <div class="table-container">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Fecha</th>
-                      <th>Tipo</th>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Motivo</th>
-                    </tr>
-                  </thead>
-                  <tbody id="search-movements"></tbody>
-                </table>
-              </div>
-            </div>
+            <div class="card-header"><h3>Movimientos</h3><span class="result-count" id="search-mov-count">0 resultados</span></div>
+            <div class="card-content"><div class="table-container">
+              <table class="data-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Artículo</th><th>Cantidad</th><th>Documento</th></tr></thead><tbody id="search-movimientos"></tbody></table>
+            </div></div>
           </div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- Edit Product Modal -->
-  <div class="modal-overlay" id="edit-modal">
+  <!-- ===== Modales de edición ===== -->
+  <div class="modal-overlay" id="modal-articulo">
     <div class="modal">
-      <div class="modal-header">
-        <h3>Editar Producto</h3>
-        <button class="modal-close" onclick="closeEditModal()">&times;</button>
-      </div>
-      <form id="edit-form">
-        <input type="hidden" id="editar-producto-id">
+      <div class="modal-header"><h3>Editar Artículo</h3><button class="modal-close" data-close="modal-articulo">&times;</button></div>
+      <form id="edit-articulo-form">
+        <input type="hidden" id="ea-id">
         <div class="form-grid">
-          <div class="form-group">
-            <label for="editar-codigo-producto">Codigo</label>
-            <input type="text" id="editar-codigo-producto" required>
-          </div>
-          <div class="form-group">
-            <label for="editar-nombre-producto">Nombre</label>
-            <input type="text" id="editar-nombre-producto" required>
-          </div>
-          <div class="form-group">
-            <label for="editar-unidad-producto">Unidad de Medida</label>
-            <select id="editar-unidad-producto" required>
-              <option value="0">Unidad</option>
-              <option value="1">Kilogramo (kg)</option>
-              <option value="2">Gramo (g)</option>
-              <option value="3">Litro (l)</option>
-              <option value="4">Mililitro (ml)</option>
-              <option value="5">Metro (m)</option>
-              <option value="6">Centimetro (cm)</option>
-              <option value="7">Caja</option>
-              <option value="8">Paquete</option>
-              <option value="9">Docena</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="editar-tipo-producto">Grupo</label>
-            <select id="editar-tipo-producto" required>
-              <option value="0">Electronica</option>
-              <option value="1">Alimentos</option>
-              <option value="2">Bebidas</option>
-              <option value="3">Limpieza</option>
-              <option value="4">Papeleria</option>
-              <option value="5">Herramientas</option>
-              <option value="6">Ropa</option>
-              <option value="7">Hogar</option>
-              <option value="8">Otros</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="editar-stock-producto">Stock</label>
-            <input type="number" id="editar-stock-producto" min="0" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="editar-stock-minimo">Stock Minimo</label>
-            <input type="number" id="editar-stock-minimo" min="0" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="editar-precio-unitario">Precio</label>
-            <input type="number" id="editar-precio-unitario" min="0" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="editar-almacen-producto">Almacen</label>
-            <select id="editar-almacen-producto">
-              <option value="0">Principal</option>
-              <option value="1">Secundario</option>
-              <option value="2">Bodega</option>
-            </select>
-          </div>
+          <div class="form-group"><label for="ea-codigo">Código</label><input type="text" id="ea-codigo" readonly></div>
+          <div class="form-group"><label for="ea-nombre">Nombre</label><input type="text" id="ea-nombre" required></div>
+          <div class="form-group"><label for="ea-unidad">Unidad de medida</label><select id="ea-unidad" required></select></div>
+          <div class="form-group"><label for="ea-stockmin">Stock mínimo</label><input type="number" id="ea-stockmin" min="0" step="0.01"></div>
+          <div class="form-group full"><label for="ea-cuenta">Cuenta de gasto</label><select id="ea-cuenta" required></select></div>
         </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close="modal-articulo">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
       </form>
     </div>
   </div>
 
-  <!-- Edit Supplier Modal -->
-  <div class="modal-overlay" id="edit-supplier-modal">
+  <div class="modal-overlay" id="modal-proveedor">
     <div class="modal">
-      <div class="modal-header">
-        <h3>Editar Proveedor</h3>
-        <button class="modal-close" onclick="closeSupplierModal()">&times;</button>
-      </div>
-      <form id="edit-supplier-form">
-        <input type="hidden" id="editar-proveedor-id">
+      <div class="modal-header"><h3>Editar Proveedor</h3><button class="modal-close" data-close="modal-proveedor">&times;</button></div>
+      <form id="edit-proveedor-form">
+        <input type="hidden" id="ep-id">
         <div class="form-grid">
-          <div class="form-group">
-            <label for="editar-supplier-rut">RUT</label>
-            <input type="text" id="editar-supplier-rut">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-name">Razón Social / Nombre</label>
-            <input type="text" id="editar-supplier-name" required>
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-giro">Giro</label>
-            <input type="text" id="editar-supplier-giro">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-contact">Contacto</label>
-            <input type="text" id="editar-supplier-contact">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-phone">Teléfono</label>
-            <input type="text" id="editar-supplier-phone">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-email">Email</label>
-            <input type="email" id="editar-supplier-email">
-          </div>
-          <div class="form-group">
-            <label for="editar-supplier-address">Dirección</label>
-            <input type="text" id="editar-supplier-address">
-          </div>
+          <div class="form-group"><label for="ep-rut">RUT</label><input type="text" id="ep-rut"></div>
+          <div class="form-group"><label for="ep-razon">Razón Social</label><input type="text" id="ep-razon" required></div>
+          <div class="form-group"><label for="ep-direccion">Dirección</label><input type="text" id="ep-direccion"></div>
+          <div class="form-group"><label for="ep-telefono">Teléfono</label><input type="text" id="ep-telefono"></div>
         </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeSupplierModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close="modal-proveedor">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
       </form>
     </div>
   </div>
 
-  <!-- Quick Supplier Modal (desde Movimientos) -->
-  <div class="modal-overlay" id="quick-supplier-modal">
+  <div class="modal-overlay" id="modal-cuenta">
     <div class="modal">
-      <div class="modal-header">
-        <h3>Registrar Proveedor</h3>
-        <button class="modal-close" onclick="closeQuickSupplierModal()">&times;</button>
-      </div>
-      <form id="quick-supplier-form">
+      <div class="modal-header"><h3>Editar Cuenta</h3><button class="modal-close" data-close="modal-cuenta">&times;</button></div>
+      <form id="edit-cuenta-form">
+        <input type="hidden" id="ec-id">
         <div class="form-grid">
-          <div class="form-group">
-            <label for="quick-supplier-rut">RUT</label>
-            <input type="text" id="quick-supplier-rut" class="uppercase-input" placeholder="Ej: 76.123.456-7" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-name">Razón Social / Nombre *</label>
-            <input type="text" id="quick-supplier-name" required class="uppercase-input" placeholder="Nombre del proveedor" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-giro">Giro</label>
-            <input type="text" id="quick-supplier-giro" placeholder="Giro o rubro" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-contact">Contacto</label>
-            <input type="text" id="quick-supplier-contact" placeholder="Persona de contacto" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-phone">Teléfono</label>
-            <input type="text" id="quick-supplier-phone" placeholder="Ej: +56 9 1234 5678" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-email">Email</label>
-            <input type="email" id="quick-supplier-email" placeholder="correo@empresa.cl" autocomplete="off">
-          </div>
-          <div class="form-group">
-            <label for="quick-supplier-address">Dirección</label>
-            <input type="text" id="quick-supplier-address" placeholder="Dirección" autocomplete="off">
-          </div>
+          <div class="form-group"><label for="ec-codigo">Código</label><input type="text" id="ec-codigo" required></div>
+          <div class="form-group"><label for="ec-nombre">Nombre</label><input type="text" id="ec-nombre" required></div>
         </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeQuickSupplierModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar y Seleccionar</button>
-        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close="modal-cuenta">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
       </form>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div class="toast" id="toast">
-    <span class="toast-message"></span>
+  <div class="modal-overlay" id="modal-firmante">
+    <div class="modal">
+      <div class="modal-header"><h3>Editar Firmante</h3><button class="modal-close" data-close="modal-firmante">&times;</button></div>
+      <form id="edit-firmante-form">
+        <input type="hidden" id="ef-id">
+        <div class="form-grid">
+          <div class="form-group"><label for="ef-nombre">Nombre</label><input type="text" id="ef-nombre" required></div>
+          <div class="form-group"><label for="ef-grado">Grado</label><input type="text" id="ef-grado"></div>
+          <div class="form-group"><label for="ef-cargo">Cargo</label><input type="text" id="ef-cargo"></div>
+          <div class="form-group"><label for="ef-rut">RUT</label><input type="text" id="ef-rut"></div>
+          <div class="form-group"><label for="ef-orden">Orden</label><input type="number" id="ef-orden" min="1" step="1"></div>
+        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close="modal-firmante">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+      </form>
+    </div>
   </div>
 
-  <!-- Librerias de exportacion (Excel / PDF) -->
+  <div class="modal-overlay" id="modal-seccion">
+    <div class="modal">
+      <div class="modal-header"><h3>Editar Sección</h3><button class="modal-close" data-close="modal-seccion">&times;</button></div>
+      <form id="edit-seccion-form">
+        <input type="hidden" id="es-id">
+        <div class="form-grid">
+          <div class="form-group full"><label for="es-nombre">Nombre</label><input type="text" id="es-nombre" required></div>
+        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close="modal-seccion">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal proveedor rápido (desde Recepción) -->
+  <div class="modal-overlay" id="modal-quick-prov">
+    <div class="modal">
+      <div class="modal-header"><h3>Registrar Proveedor</h3><button class="modal-close" data-close="modal-quick-prov">&times;</button></div>
+      <form id="quick-prov-form">
+        <div class="form-grid">
+          <div class="form-group"><label for="qp-rut">RUT</label><input type="text" id="qp-rut" class="uppercase-input" placeholder="Ej: 76.123.456-7"></div>
+          <div class="form-group"><label for="qp-razon">Razón Social *</label><input type="text" id="qp-razon" required class="uppercase-input"></div>
+          <div class="form-group"><label for="qp-direccion">Dirección</label><input type="text" id="qp-direccion"></div>
+          <div class="form-group"><label for="qp-telefono">Teléfono</label><input type="text" id="qp-telefono"></div>
+        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close="modal-quick-prov">Cancelar</button><button type="submit" class="btn btn-primary">Guardar y seleccionar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal anular -->
+  <div class="modal-overlay" id="modal-anular">
+    <div class="modal">
+      <div class="modal-header"><h3>Anular Acta</h3><button class="modal-close" data-close="modal-anular">&times;</button></div>
+      <form id="anular-form">
+        <input type="hidden" id="an-tipo">
+        <input type="hidden" id="an-id">
+        <p style="margin-bottom:1rem;color:var(--text-secondary);">Se revertirán los saldos afectados. El acta queda registrada como anulada.</p>
+        <div class="form-group full"><label for="an-motivo">Motivo de anulación *</label><input type="text" id="an-motivo" required placeholder="Motivo"></div>
+        <div class="modal-actions"><button type="button" class="btn btn-secondary" data-close="modal-anular">Cancelar</button><button type="submit" class="btn btn-danger">Anular</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"><span class="toast-message"></span></div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
-  <!-- Firebase SDK -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
