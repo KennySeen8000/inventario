@@ -1028,3 +1028,102 @@ body {
   background: var(--background);
   color: var(--text-secondary);
 }
+/* ===== Añadidos: Sistema de Existencias ===== */
+
+/* Selector de rol en sidebar */
+.role-box {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.role-box label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+.role-box select {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--sidebar-hover);
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* Grupo de campo a ancho completo */
+.form-group.full { grid-column: 1 / -1; }
+
+/* Línea de entrada de ítems (recepción / salida) */
+.line-entry {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--background);
+  border-radius: var(--radius);
+}
+.line-entry .form-group { margin: 0; }
+.line-entry .grow { min-width: 0; }
+.line-entry .line-add button { width: 100%; white-space: nowrap; }
+
+/* Barra de totales */
+.totales-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.totales-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-width: 280px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+.totales-row strong { color: var(--text-primary); font-size: 1.05rem; }
+.totales-row.total-final {
+  border-top: 1px dashed var(--border);
+  padding-top: 0.5rem;
+  font-weight: 600;
+}
+.totales-row.total-final strong { font-size: 1.25rem; color: var(--primary); }
+.iva-input {
+  width: 140px;
+  padding: 0.4rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  text-align: right;
+}
+.iva-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+/* Panel de acta generada */
+.acta-panel { margin-top: 1.5rem; border-left: 4px solid var(--success); }
+.acta-ok { margin-bottom: 1rem; color: var(--text-primary); font-weight: 500; }
+
+/* Fila anulada */
+.row-anulada td { color: var(--text-muted); text-decoration: line-through; }
+.row-anulada .badge { text-decoration: none; }
+
+/* Botón pequeño dentro de tablas */
+.data-table .actions .btn.btn-sm { text-decoration: none; }
+.data-table .actions { flex-wrap: wrap; gap: 0.35rem; }
+
+/* Info de campo (código/stock desplegado) */
+.field-hint strong { color: var(--primary); }
+
+@media (max-width: 768px) {
+  .line-entry { grid-template-columns: 1fr; }
+  .totales-row { min-width: 0; width: 100%; }
+}
